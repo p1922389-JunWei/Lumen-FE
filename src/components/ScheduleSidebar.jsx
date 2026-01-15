@@ -23,7 +23,7 @@ const ScheduleSidebar = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
-        <h2>hey! Care</h2>
+        <h2>LUMEN</h2>
       </div>
       
       <nav className="sidebar-nav">

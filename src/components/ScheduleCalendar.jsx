@@ -1,7 +1,7 @@
 import React from 'react';
 import './ScheduleCalendar.css';
 
-const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate }) => {
+const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date() }) => {
   const timeSlots = [
     '8 AM',
     '9 AM',
@@ -11,19 +11,32 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     '1 PM',
   ];
 
-  const getWeekDays = () => [
-    { label: 'MON', date: 8, fullDate: new Date(2024, 0, 8) },
-    { label: 'TUE', date: 9, fullDate: new Date(2024, 0, 9) },
-    { label: 'WED', date: 10, fullDate: new Date(2024, 0, 10) },
-    { label: 'THU', date: 11, fullDate: new Date(2024, 0, 11) },
-    { label: 'FRI', date: 12, fullDate: new Date(2024, 0, 12) },
-    { label: 'SAT', date: 13, fullDate: new Date(2024, 0, 13) },
-    { label: 'SUN', date: 14, fullDate: new Date(2024, 0, 14) },
-  ];
+  const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+  const getWeekDays = () => {
+    const day = currentDate.getDay();
+    const diff = currentDate.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+    const monday = new Date(currentDate);
+    monday.setDate(diff);
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      days.push({
+        label: dayLabels[date.getDay()],
+        date: date.getDate(),
+        fullDate: date,
+        month: date.getMonth(),
+        year: date.getFullYear()
+      });
+    }
+    return days;
+  };
 
   const getMonthDays = () => {
-    const year = 2024;
-    const month = 0; // January
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const startPadding = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
@@ -84,8 +97,23 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     return icons[type] || '📌';
   };
 
-  const getEventsForDate = (date) => {
-    return events.filter(event => event.date === date);
+  const getEventsForDate = (fullDate) => {
+    return events.filter(event => {
+      // Match by full date if event has fullDate, otherwise match by date number in January 2026
+      if (event.fullDate) {
+        return event.fullDate.toDateString() === fullDate.toDateString();
+      }
+      // For demo events with just date number (assuming January 2026)
+      return event.date === fullDate.getDate() && 
+             fullDate.getMonth() === 0 && 
+             fullDate.getFullYear() === 2026;
+    });
+  };
+
+  const isToday = (fullDate) => {
+    // For demo, "today" is Jan 14, 2026
+    const today = new Date(2026, 0, 14);
+    return fullDate.toDateString() === today.toDateString();
   };
 
   if (viewType === 'month') {
@@ -103,11 +131,11 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
           {monthDays.map((day, idx) => (
             <div 
               key={idx} 
-              className={`month-day-cell ${!day.isCurrentMonth ? 'other-month' : ''} ${day.date === 10 && day.isCurrentMonth ? 'today' : ''}`}
+              className={`month-day-cell ${!day.isCurrentMonth ? 'other-month' : ''} ${isToday(day.fullDate) ? 'today' : ''}`}
             >
               <div className="month-day-number">{day.date}</div>
               <div className="month-day-events">
-                {day.isCurrentMonth && getEventsForDate(day.date).slice(0, 3).map(event => (
+                {getEventsForDate(day.fullDate).slice(0, 3).map(event => (
                   <div
                     key={event.id}
                     className="month-event"
@@ -118,9 +146,9 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                     <span className="month-event-title">{event.title}</span>
                   </div>
                 ))}
-                {day.isCurrentMonth && getEventsForDate(day.date).length > 3 && (
+                {getEventsForDate(day.fullDate).length > 3 && (
                   <div className="month-event-more">
-                    +{getEventsForDate(day.date).length - 3} more
+                    +{getEventsForDate(day.fullDate).length - 3} more
                   </div>
                 )}
               </div>
@@ -141,7 +169,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
         {days.map((day, idx) => (
           <div key={idx} className="day-header">
             <div className="day-label">{day.label}</div>
-            <div className={`day-date ${day.date === 10 ? 'today' : ''}`}>{day.date}</div>
+            <div className={`day-date ${isToday(day.fullDate) ? 'today' : ''}`}>{day.date}</div>
           </div>
         ))}
       </div>
@@ -152,9 +180,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
             <div className="time-slot">{time}</div>
             {days.map((day, dayIdx) => (
               <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
-                {events
-                  .filter(event => event.date === day.date)
-                  .map(event => (
+                {getEventsForDate(day.fullDate).map(event => (
                     <div
                       key={event.id}
                       className="event-card"

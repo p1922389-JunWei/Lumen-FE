@@ -3,14 +3,57 @@ import './Schedule.css';
 import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
+import DatePickerModal from './DatePickerModal';
 
 const Schedule = () => {
   const [viewType, setViewType] = useState('week');
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [dateRange, setDateRange] = useState({
-    start: new Date(2024, 0, 8),
-    end: new Date(2024, 0, 14)
-  });
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 14)); // Jan 14, 2026
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const getWeekRange = (date) => {
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Monday start
+    const monday = new Date(date);
+    monday.setDate(diff);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return { start: monday, end: sunday };
+  };
+
+  const formatDateRange = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    if (viewType === 'week') {
+      const { start, end } = getWeekRange(currentDate);
+      return `${months[start.getMonth()]} ${start.getDate()}, ${start.getFullYear()} - ${months[end.getMonth()]} ${end.getDate()}, ${end.getFullYear()}`;
+    } else {
+      return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    }
+  };
+
+  const navigatePrev = () => {
+    const newDate = new Date(currentDate);
+    if (viewType === 'week') {
+      newDate.setDate(newDate.getDate() - 7);
+    } else {
+      newDate.setMonth(newDate.getMonth() - 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const navigateNext = () => {
+    const newDate = new Date(currentDate);
+    if (viewType === 'week') {
+      newDate.setDate(newDate.getDate() + 7);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const goToToday = () => {
+    setCurrentDate(new Date(2026, 0, 14)); // Reset to Jan 14, 2026
+  };
 
   const events = [
     {
@@ -133,8 +176,14 @@ const Schedule = () => {
                 Month
               </button>
             </div>
-            <div className="date-range">
-              <span>Jan 8, 2024 - Jan 14 2024</span>
+            <div className="date-navigation">
+              <button className="nav-btn" onClick={navigatePrev}>‹</button>
+              <div className="date-range" onClick={() => setShowDatePicker(true)}>
+                <span>{formatDateRange()}</span>
+                <span className="dropdown-icon">▼</span>
+              </div>
+              <button className="nav-btn" onClick={navigateNext}>›</button>
+              <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
             <div className="header-actions">
               <button className="search-btn">🔍</button>
@@ -146,12 +195,23 @@ const Schedule = () => {
           events={events} 
           onEventClick={setSelectedEvent}
           viewType={viewType}
+          currentDate={currentDate}
         />
       </div>
       {selectedEvent && (
         <EventModal 
           event={selectedEvent} 
           onClose={() => setSelectedEvent(null)}
+        />
+      )}
+      {showDatePicker && (
+        <DatePickerModal
+          currentDate={currentDate}
+          onSelect={(date) => {
+            setCurrentDate(date);
+            setShowDatePicker(false);
+          }}
+          onClose={() => setShowDatePicker(false)}
         />
       )}
     </div>

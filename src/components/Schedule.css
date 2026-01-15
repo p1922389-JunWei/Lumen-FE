@@ -56,9 +56,71 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.date-range {
-  font-size: 14px;
+.date-navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #666;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  min-width: 180px;
+  text-align: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.date-range:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-icon {
+  font-size: 10px;
+  color: #999;
+}
+
+.today-btn {
+  padding: 6px 12px;
+  border: 1px solid #4A90E2;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4A90E2;
+  transition: all 0.2s;
+}
+
+.today-btn:hover {
+  background-color: #4A90E2;
+  color: white;
 }
 
 .header-actions {
