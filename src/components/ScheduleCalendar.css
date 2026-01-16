@@ -1,0 +1,232 @@
+.calendar-container {
+  flex: 1;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  gap: 1px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.day-header {
+  text-align: center;
+  padding-bottom: 12px;
+}
+
+.day-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.day-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.day-date.today {
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e0e0e0;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.time-row {
+  display: contents;
+}
+
+.time-slot {
+  background-color: #f9f9f9;
+  padding: 12px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  text-align: right;
+  border-right: 1px solid #e0e0e0;
+  min-height: 80px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.day-slot {
+  background-color: white;
+  padding: 8px;
+  min-height: 80px;
+  position: relative;
+}
+
+.event-card {
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 6px;
+  border-left: 3px solid #4A90E2;
+  transition: all 0.2s;
+}
+
+.event-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.event-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.event-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.event-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.event-icon {
+  font-size: 12px;
+}
+
+/* Month View Styles */
+.month-view {
+  padding: 16px;
+}
+
+.month-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  margin-bottom: 8px;
+}
+
+.month-day-label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  padding: 12px 0;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e0e0e0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.month-day-cell {
+  background-color: white;
+  min-height: 120px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.month-day-cell.other-month {
+  background-color: #f9f9f9;
+}
+
+.month-day-cell.other-month .month-day-number {
+  color: #ccc;
+}
+
+.month-day-cell.today .month-day-number {
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-day-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.month-day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.month-event {
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  border-left: 2px solid #4A90E2;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+
+.month-event:hover {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.month-event-time {
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.month-event-title {
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.month-event-more {
+  font-size: 11px;
+  color: #4A90E2;
+  padding: 2px 6px;
+  cursor: pointer;
+}

@@ -15,86 +15,72 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const storedUser = localStorage.getItem('minds_user');
+    // Check if user is logged in on mount
+    const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  // Senior login with OTP (simulated)
-  const loginWithOtp = async (phone, otp) => {
-    // Simulated OTP verification - in production, call backend
-    if (otp === '123456') {
-      const userData = {
-        id: `senior_${phone}`,
-        phone,
-        role: 'participant',
-        name: `Participant ${phone.slice(-4)}`,
-      };
-      setUser(userData);
-      localStorage.setItem('minds_user', JSON.stringify(userData));
-      return { success: true };
-    }
-    return { success: false, error: 'Invalid OTP' };
+  const getToken = () => {
+    return localStorage.getItem('token');
   };
 
-  // Staff login with email/password
-  const loginWithEmail = async (email, password) => {
+  const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      // Backend expects NRIC, but we'll use email field as NRIC for now
+      // In production, update the form to use NRIC field
+      const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ NRIC: email, password }),
       });
-      
+
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+
       const data = await response.json();
-      
-      if (response.ok && data.user) {
-        const userData = {
-          ...data.user,
-          role: 'staff',
-        };
-        setUser(userData);
-        localStorage.setItem('minds_user', JSON.stringify(userData));
+      if (data.success && data.token) {
+        setUser(data.data);
+        localStorage.setItem('user', JSON.stringify(data.data));
+        localStorage.setItem('token', data.token);
         return { success: true };
       }
-      return { success: false, error: data.message || 'Login failed' };
+      throw new Error('Login failed');
     } catch (error) {
-      // For demo purposes, allow mock login
-      if (email && password) {
-        const userData = {
-          id: `staff_${Date.now()}`,
-          email,
-          role: 'staff',
-          name: email.split('@')[0],
-        };
-        setUser(userData);
-        localStorage.setItem('minds_user', JSON.stringify(userData));
+      // Fallback for demo - accept demo credentials
+      if (email === 'demo@example.com' && password === 'password') {
+        const demoUser = { userID: 1, fullName: 'Marilyn Westervelt', NRIC: email, role: 'staff' };
+        setUser(demoUser);
+        localStorage.setItem('user', JSON.stringify(demoUser));
+        localStorage.setItem('token', 'demo-token');
         return { success: true };
       }
-      return { success: false, error: 'Connection failed' };
+      return { success: false, error: error.message };
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('minds_user');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      isAuthenticated: !!user,
-      isStaff: user?.role === 'staff',
-      isParticipant: user?.role === 'participant',
-      loginWithOtp,
-      loginWithEmail,
-      logout,
-    }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, getToken }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
