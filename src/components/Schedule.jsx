@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Schedule.css';
 import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
@@ -8,8 +8,10 @@ import DatePickerModal from './DatePickerModal';
 const Schedule = () => {
   const [viewType, setViewType] = useState('week');
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 14)); // Jan 14, 2026
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -52,108 +54,69 @@ const Schedule = () => {
   };
 
   const goToToday = () => {
-    setCurrentDate(new Date(2026, 0, 14)); // Reset to Jan 14, 2026
+    setCurrentDate(new Date());
   };
 
-  const events = [
-    {
-      id: 1,
-      title: 'Chance Ekstr Boithman',
-      time: '9:00 AM',
-      duration: '1 hour',
-      type: 'Video Call',
-      day: 'MON',
-      date: 8,
-      description: 'Complaint of abdominal pain after eating',
-      notes: 'Patient reports post-meal abdominal pain. Pain characteristics, diet history, and recent dietary changes to be evaluated.',
-      files: [{ name: 'Blood Test Report.pdf', date: '10 Aug 2023' }],
-      inPerson: false
-    },
-    {
-      id: 2,
-      title: 'Ahmad Kante',
-      time: '10:35 AM',
-      duration: '30 min',
-      type: 'Audio Call',
-      day: 'MON',
-      date: 8,
-      description: 'Follow-up consultation'
-    },
-    {
-      id: 3,
-      title: 'Miracle Workman',
-      time: '8:00 AM',
-      duration: '1 hour',
-      type: 'Home Visit',
-      day: 'TUE',
-      date: 9,
-      description: 'Home visit'
-    },
-    {
-      id: 4,
-      title: 'Zaire Vill',
-      time: '8:30 AM',
-      duration: '1 hour',
-      type: 'Meeting',
-      day: 'WED',
-      date: 10,
-      location: 'Hospital'
-    },
-    {
-      id: 5,
-      title: 'Kadin Geidt',
-      time: '9:00 AM',
-      duration: '1 hour',
-      type: 'Video Call',
-      day: 'WED',
-      date: 10
-    },
-    {
-      id: 6,
-      title: 'Pailyn Torff',
-      time: '10:30 AM',
-      duration: '45 min',
-      type: 'Audio Call',
-      day: 'WED',
-      date: 10
-    },
-    {
-      id: 7,
-      title: 'Jaylen Lubin',
-      time: '8:00 AM',
-      duration: '1 hour',
-      type: 'Home Visit',
-      day: 'FRI',
-      date: 12
-    },
-    {
-      id: 8,
-      title: 'Zaine Lubin',
-      time: '8:30 AM',
-      duration: '1 hour',
-      type: 'Home Visit',
-      day: 'FRI',
-      date: 12
-    },
-    {
-      id: 9,
-      title: 'Jaylen Cuthane',
-      time: '8:00 AM',
-      duration: '1 hour',
-      type: 'Video Call',
-      day: 'SAT',
-      date: 13
-    },
-    {
-      id: 10,
-      title: 'Chance Botosh',
-      time: '9:00 AM',
-      duration: '1 hour',
-      type: 'Video Call',
-      day: 'SAT',
-      date: 13
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:3001/api/events');
+      const data = await response.json();
+      
+      if (data.success) {
+        // Transform API events to calendar format
+        const transformedEvents = data.data.map(event => {
+          const eventDate = new Date(event.datetime);
+          const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+          
+          // Format time (e.g., "9:00 AM")
+          const hours = eventDate.getHours();
+          const minutes = eventDate.getMinutes();
+          const ampm = hours >= 12 ? 'PM' : 'AM';
+          const displayHours = hours % 12 || 12;
+          const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+          
+          // Determine event type based on location or description
+          let eventType = 'Event';
+          if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {
+            eventType = 'Home Visit';
+          } else if (event.eventName.toLowerCase().includes('call') || event.eventName.toLowerCase().includes('video')) {
+            eventType = 'Video Call';
+          } else if (event.location.toLowerCase().includes('hospital') || event.location.toLowerCase().includes('clinic')) {
+            eventType = 'Meeting';
+          } else {
+            eventType = 'Event';
+          }
+
+          return {
+            id: event.eventID,
+            title: event.eventName,
+            time: time,
+            duration: '1 hour', // Default duration, could be calculated if stored
+            type: eventType,
+            day: dayLabels[eventDate.getDay()],
+            date: eventDate.getDate(),
+            fullDate: eventDate,
+            description: event.eventDescription,
+            location: event.location,
+            notes: event.additional_information,
+            disabled_friendly: event.disabled_friendly,
+            eventData: event // Keep original data for modal
+          };
+        });
+        
+        setEvents(transformedEvents);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   return (
     <div className="schedule-container">
@@ -191,12 +154,18 @@ const Schedule = () => {
             </div>
           </div>
         </div>
-        <ScheduleCalendar 
-          events={events} 
-          onEventClick={setSelectedEvent}
-          viewType={viewType}
-          currentDate={currentDate}
-        />
+        {loading ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+            Loading events...
+          </div>
+        ) : (
+          <ScheduleCalendar 
+            events={events} 
+            onEventClick={setSelectedEvent}
+            viewType={viewType}
+            currentDate={currentDate}
+          />
+        )}
       </div>
       {selectedEvent && (
         <EventModal 

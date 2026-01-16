@@ -1,4 +1,5 @@
 import React from 'react';
+import { Accessibility } from 'lucide-react';
 import './EventModal.css';
 
 const EventModal = ({ event, onClose }) => {
@@ -18,23 +19,32 @@ const EventModal = ({ event, onClose }) => {
             </div>
           </div>
 
+          {event.location && (
+            <div className="section">
+              <h4>📍 Location</h4>
+              <p className="section-text">{event.location}</p>
+            </div>
+          )}
+
           {event.description && (
             <div className="section">
+              <h4>Description</h4>
               <p className="section-text">{event.description}</p>
             </div>
           )}
 
-          {event.type && (
+          {event.disabled_friendly && (
             <div className="section">
-              <div className="badge">
-                {event.type === 'In-Person' ? '👤' : '📹'} {event.type}
+              <div className="badge" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}>
+                <Accessibility size={16} />
+                <span>Disabled Friendly</span>
               </div>
             </div>
           )}
 
           {event.notes && (
             <div className="section">
-              <h4>Notes</h4>
+              <h4>Additional Information</h4>
               <p>{event.notes}</p>
             </div>
           )}

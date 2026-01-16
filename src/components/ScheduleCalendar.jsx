@@ -9,6 +9,10 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     '11 AM',
     'Noon',
     '1 PM',
+    '2 PM',
+    '3 PM',
+    '4 PM',
+    '5 PM',
   ];
 
   const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -99,11 +103,12 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
 
   const getEventsForDate = (fullDate) => {
     return events.filter(event => {
-      // Match by full date if event has fullDate, otherwise match by date number in January 2026
+      // Match by full date if event has fullDate
       if (event.fullDate) {
-        return event.fullDate.toDateString() === fullDate.toDateString();
+        const eventDate = new Date(event.fullDate);
+        return eventDate.toDateString() === fullDate.toDateString();
       }
-      // For demo events with just date number (assuming January 2026)
+      // Fallback for events with just date number (legacy support)
       return event.date === fullDate.getDate() && 
              fullDate.getMonth() === 0 && 
              fullDate.getFullYear() === 2026;
@@ -111,8 +116,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
   };
 
   const isToday = (fullDate) => {
-    // For demo, "today" is Jan 14, 2026
-    const today = new Date(2026, 0, 14);
+    const today = new Date();
     return fullDate.toDateString() === today.toDateString();
   };
 
@@ -178,9 +182,23 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
         {timeSlots.map((time, timeIdx) => (
           <div key={timeIdx} className="time-row">
             <div className="time-slot">{time}</div>
-            {days.map((day, dayIdx) => (
-              <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
-                {getEventsForDate(day.fullDate).map(event => (
+            {days.map((day, dayIdx) => {
+              const dayEvents = getEventsForDate(day.fullDate);
+              // Show events that match this time slot or are close to it
+              const eventsForSlot = dayEvents.filter(event => {
+                if (!event.fullDate) return false;
+                const eventDate = new Date(event.fullDate);
+                const eventHour = eventDate.getHours();
+                const slotHour = time === 'Noon' ? 12 : parseInt(time);
+                const isPM = time.includes('PM');
+                const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === 'Noon' ? 12 : slotHour);
+                // Show event if it's in this hour or within 1 hour range
+                return Math.abs(eventHour - actualHour) <= 1;
+              });
+              
+              return (
+                <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
+                  {eventsForSlot.map(event => (
                     <div
                       key={event.id}
                       className="event-card"
@@ -189,14 +207,11 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                     >
                       <div className="event-time">{event.time}</div>
                       <div className="event-title">{event.title}</div>
-                      <div className="event-meta">
-                        <span className="event-icon">{getEventIcon(event.type)}</span>
-                        <span className="event-type">{event.type}</span>
-                      </div>
                     </div>
                   ))}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
