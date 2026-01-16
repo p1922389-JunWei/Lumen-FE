@@ -153,7 +153,7 @@ const ChoiceGate = () => {
     setLoading(false);
     
     if (result.success) {
-      navigate('/calendar');
+      navigate('/schedule');
     } else {
       setError(t('login.invalidOtp'));
     }

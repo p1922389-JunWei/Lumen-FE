@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Calendar, User, LogOut, Sun } from 'lucide-react';
 import './ScheduleSidebar.css';
 
 const ScheduleSidebar = () => {
@@ -8,11 +9,8 @@ const ScheduleSidebar = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { icon: '📅', label: 'Schedule', path: '/' },
-    { icon: '👥', label: 'Patients', path: '/patients' },
-    { icon: '📋', label: 'Programs', path: '/programs' },
-    { icon: '📊', label: 'Reports', path: '/reports' },
-    { icon: '🧪', label: 'Laboratory', path: '/laboratory' },
+    { icon: Calendar, label: 'Schedule', path: '/' },
+    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   const handleLogout = () => {
@@ -23,22 +21,26 @@ const ScheduleSidebar = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
+        <Sun size={24} className="logo-icon" />
         <h2>LUMEN</h2>
       </div>
       
       <nav className="sidebar-nav">
-        {menuItems.map((item, idx) => (
-          <Link 
-            key={idx} 
-            to={item.path}
-            className="nav-item-link"
-          >
-            <div className="nav-item">
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
-            </div>
-          </Link>
-        ))}
+        {menuItems.map((item, idx) => {
+          const IconComponent = item.icon;
+          return (
+            <Link 
+              key={idx} 
+              to={item.path}
+              className="nav-item-link"
+            >
+              <div className="nav-item">
+                <IconComponent size={20} className="nav-icon" />
+                <span className="nav-label">{item.label}</span>
+              </div>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="sidebar-footer">
@@ -47,6 +49,7 @@ const ScheduleSidebar = () => {
           <div className="user-info">
             <div className="user-name">{user?.name || 'User'}</div>
             <button className="logout-btn" onClick={handleLogout}>
+              <LogOut size={16} />
               Logout
             </button>
           </div>

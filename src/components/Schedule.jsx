@@ -4,6 +4,7 @@ import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
+import { Search, Settings, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
 const Schedule = () => {
   const [viewType, setViewType] = useState('week');
@@ -140,17 +141,17 @@ const Schedule = () => {
               </button>
             </div>
             <div className="date-navigation">
-              <button className="nav-btn" onClick={navigatePrev}>‹</button>
+              <button className="nav-btn" onClick={navigatePrev}><ChevronLeft size={18} /></button>
               <div className="date-range" onClick={() => setShowDatePicker(true)}>
                 <span>{formatDateRange()}</span>
-                <span className="dropdown-icon">▼</span>
+                <ChevronDown size={14} className="dropdown-icon" />
               </div>
-              <button className="nav-btn" onClick={navigateNext}>›</button>
+              <button className="nav-btn" onClick={navigateNext}><ChevronRight size={18} /></button>
               <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
             <div className="header-actions">
-              <button className="search-btn">🔍</button>
-              <button className="settings-btn">⚙️</button>
+              <button className="search-btn"><Search size={18} /></button>
+              <button className="settings-btn"><Settings size={18} /></button>
             </div>
           </div>
         </div>

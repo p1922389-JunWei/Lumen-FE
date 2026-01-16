@@ -1,7 +1,7 @@
 import React from 'react';
 import './ScheduleCalendar.css';
 
-const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date() }) => {
+const ScheduleCalendar = ({ events = [], onEventClick = () => {}, viewType = 'week', currentDate = new Date() }) => {
   const timeSlots = [
     '8 AM',
     '9 AM',
