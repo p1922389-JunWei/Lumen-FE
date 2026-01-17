@@ -209,3 +209,55 @@
 .btn-start:hover {
   background-color: #3a7bc8;
 }
+.capacity-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.registered-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.registered-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.registered-item span:first-child {
+  font-weight: 500;
+  color: #333;
+}
+
+.registered-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.btn-reserve {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-reserve:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.btn-unregister {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-unregister:hover:not(:disabled) {
+  background-color: #c82333;
+}

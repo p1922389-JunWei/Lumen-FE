@@ -1,7 +1,7 @@
 import React from 'react';
 import './ScheduleCalendar.css';
 
-const ScheduleCalendar = ({ events = [], onEventClick = () => {}, viewType = 'week', currentDate = new Date() }) => {
+const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date(), userRole }) => {
   const timeSlots = [
     '8 AM',
     '9 AM',
@@ -115,6 +115,30 @@ const ScheduleCalendar = ({ events = [], onEventClick = () => {}, viewType = 'we
     });
   };
 
+  const getCapacityIndicator = (event) => {
+    const participantsFull = (event.registered_participants || 0) >= (event.max_participants || 10);
+    const volunteersFull = (event.registered_volunteers || 0) >= (event.max_volunteers || 5);
+    
+    if (participantsFull && volunteersFull) {
+      return '🔴'; // Full
+    } else if (participantsFull || volunteersFull) {
+      return '🟡'; // Partially full
+    }
+    return '🟢'; // Available
+  };
+
+  const getRegistrationBadge = (event) => {
+    // Only show for participants and volunteers
+    if (userRole !== 'participant' && userRole !== 'volunteer') {
+      return null;
+    }
+    
+    if (event.isUserRegistered) {
+      return '✓'; // Checkmark for registered events
+    }
+    return null;
+  };
+
   const isToday = (fullDate) => {
     const today = new Date();
     return fullDate.toDateString() === today.toDateString();
@@ -130,11 +154,14 @@ const ScheduleCalendar = ({ events = [], onEventClick = () => {}, viewType = 'we
           {weekDayLabels.map((day, idx) => (
             <div key={idx} className="month-day-label">{day}</div>
           ))}
-        </div>
-        <div className="month-grid">
-          {monthDays.map((day, idx) => (
-            <div 
-              key={idx} 
+        </div>{`month-event ${event.isUserRegistered ? 'user-registered' : ''}`}
+                    style={{ backgroundColor: getEventColor(event.type) }}
+                    onClick={() => onEventClick(event)}
+                  >
+                    <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
+                    {getRegistrationBadge(event) && (
+                      <span className="registration-badge">{getRegistrationBadge(event)}</span>
+                    )}
               className={`month-day-cell ${!day.isCurrentMonth ? 'other-month' : ''} ${isToday(day.fullDate) ? 'today' : ''}`}
             >
               <div className="month-day-number">{day.date}</div>
@@ -146,6 +173,7 @@ const ScheduleCalendar = ({ events = [], onEventClick = () => {}, viewType = 'we
                     style={{ backgroundColor: getEventColor(event.type) }}
                     onClick={() => onEventClick(event)}
                   >
+                    <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
                     <span className="month-event-time">{event.time}</span>
                     <span className="month-event-title">{event.title}</span>
                   </div>
@@ -198,14 +226,20 @@ const ScheduleCalendar = ({ events = [], onEventClick = () => {}, viewType = 'we
               
               return (
                 <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
-                  {eventsForSlot.map(event => (
-                    <div
-                      key={event.id}
-                      className="event-card"
+                  {eventsForSlot{`event-card ${event.isUserRegistered ? 'user-registered' : ''}`}
                       style={{ backgroundColor: getEventColor(event.type) }}
                       onClick={() => onEventClick(event)}
                     >
-                      <div className="event-time">{event.time}</div>
+                      <div className="event-header-row">
+                        <span className="event-indicator">{getCapacityIndicator(event)}</span>
+                        {getRegistrationBadge(event) && (
+                          <span className="registration-badge">{getRegistrationBadge(event)}</span>
+                        )}
+                    >
+                      <div className="event-header-row">
+                        <span className="event-indicator">{getCapacityIndicator(event)}</span>
+                        <div className="event-time">{event.time}</div>
+                      </div>
                       <div className="event-title">{event.title}</div>
                     </div>
                   ))}

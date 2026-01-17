@@ -4,15 +4,17 @@ import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
-import { Search, Settings, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Schedule = () => {
+  const { user, getToken } = useAuth();
   const [viewType, setViewType] = useState('week');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -60,7 +62,30 @@ const Schedule = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+    if (user && (user.role === 'participant' || user.role === 'volunteer')) {
+      fetchUserRegisteredEvents();
+    }
+  }, [user]);
+
+  const fetchUserRegisteredEvents = async () => {
+    if (!user) return;
+    
+    try {
+      const endpoint = user.role === 'participant'
+        ? `http://localhost:3001/api/participants/${user.userID}/events`
+        : `http://localhost:3001/api/volunteers/${user.userID}/events`;
+      
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Store just the event IDs for quick lookup
+        setUserRegisteredEvents(data.data.map(e => e.eventID));
+      }
+    } catch (error) {
+      console.error('Error fetching user registered events:', error);
+    }
+  };
 
   const fetchEvents = async () => {
     try {
@@ -90,6 +115,7 @@ const Schedule = () => {
           } else if (event.location.toLowerCase().includes('hospital') || event.location.toLowerCase().includes('clinic')) {
             eventType = 'Meeting';
           } else {
+            isUserRegistered: userRegisteredEvents.includes(event.eventID),
             eventType = 'Event';
           }
 
@@ -99,6 +125,159 @@ const Schedule = () => {
             time: time,
             duration: '1 hour', // Default duration, could be calculated if stored
             type: eventType,
+            day: dayLabels[eventDate.getDay()],
+            date: eventDate.getDate(),
+            fullDate: eventDate,
+            description: event.eventDescription,
+            location: event.location,
+            notes: event.additional_information,
+            disabled_friendly: event.disabled_friendly,
+            max_participants: event.max_participants,
+            max_volunteers: event.max_volunteers,
+            registered_participants: event.registered_participants,
+            registered_volunteers: event.registered_volunteers,
+            eventData: event // Keep original data for modal
+          };
+        });
+        
+        setEvents(transformedEvents);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEventDetails = async (eventId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/events/${eventId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        const event = data.data;
+        const eventDate = new Date(event.datetime);
+        const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+        
+        const hours = eventDate.getHours();
+        const minutes = eventDate.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
+        let eventType = 'Event';
+        if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {
+          eventType = 'Home Visit';
+        } else if (event.eventName.toLowerCase().includes('call') || event.eventName.toLowerCase().includes('video')) {
+          eventType = 'Video Call';
+        } else if (event.location.toLowerCase().includes('hospital') || event.location.toLowerCase().includes('clinic')) {
+          eventType = 'Meeting';
+        }
+
+        return {
+          id: event.eventID,
+          title: event.eventName,
+          time: time,
+          duration: '1 hour',
+          type: eventType,
+          day: dayLabels[eventDate.getDay()],
+          date: eventDate.getDate(),
+          fullDate: eventDate,
+          description: event.eventDescription,
+          location: event.location,
+          notes: event.additional_information,
+          disabled_friendly: event.disabled_friendly,
+          max_participants: event.max_participants,
+          max_volunteers: event.max_volunteers,
+          registered_participants: event.registered_participants,
+          registered_volunteers: event.registered_volunteers,
+          participants: event.participants,
+          volunteers: event.volunteers
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+    }
+    return null;
+  };
+
+  const handleEventClick = async (event) => {
+    // Fetch full event details including participants/volunteers
+    const detailedEvent = await fetchEventDetails(event.id);
+    setSelectedEvent(detailedEvent || event);
+  };
+
+  const handleReserve = async (eventId) => {
+    if (!user) {
+      alert('Please log in to reserve a spot');
+      return;
+    }
+
+    const endpoint = user.role === 'participant' 
+      ? 'http://localhost:3001/api/participant-events'
+      : 'http://localhost:3001/api/volunteer-events';
+
+    const idField = user.role === 'participant' ? 'participantID' : 'volunteerID';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [idField]: user.userID,
+          eventID: eventId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Successfully reserved!');
+        // Refresh UserRegisteredEvents();
+        await fetchevents and event details
+        await fetchEvents();
+        const updatedEvent = await fetchEventDetails(eventId);
+        setSelectedEvent(updatedEvent);
+      } else {
+        alert(data.error || 'Failed to reserve spot');
+      }
+    } catch (error) {
+      console.error('Error reserving:', error);
+      alert('Failed to reserve spot');
+    }
+  };
+
+  const handleUnregister = async (eventId) => {
+    if (!user) return;
+
+    const endpoint = user.role === 'participant'
+      ? `http://localhost:3001/api/participant-events/${user.userID}/${eventId}`
+      : `http://localhost:3001/api/volunteer-events/${user.userID}/${eventId}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Successfully unregistered!');
+        // Refresh UserRegisteredEvents();
+        await fetchevents and event details
+        await fetchEvents();
+        const updatedEvent = await fetchEventDetails(eventId);
+        setSelectedEvent(updatedEvent);
+      } else {
+        alert(data.error || 'Failed to unregister');
+      }
+    } catch (error) {
+      console.error('Error unregistering:', error);
+      alert('Failed to unregister');
+    }
+  };
             day: dayLabels[eventDate.getDay()],
             date: eventDate.getDate(),
             fullDate: eventDate,
@@ -141,17 +320,17 @@ const Schedule = () => {
               </button>
             </div>
             <div className="date-navigation">
-              <button className="nav-btn" onClick={navigatePrev}><ChevronLeft size={18} /></button>
+              <button className="nav-btn" onClick={navigatePrev}>‹</button>
               <div className="date-range" onClick={() => setShowDatePicker(true)}>
                 <span>{formatDateRange()}</span>
-                <ChevronDown size={14} className="dropdown-icon" />
+                <span className="dropdown-icon">▼</span>
               </div>
-              <button className="nav-btn" onClick={navigateNext}><ChevronRight size={18} /></button>
+              <button className="nav-btn" onClick={navigateNext}>›</button>
               <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
             <div className="header-actions">
-              <button className="search-btn"><Search size={18} /></button>
-              <button className="settings-btn"><Settings size={18} /></button>
+              <button className="search-btn">🔍</button>
+              <button className="settings-btn">⚙️</button>
             </div>
           </div>
         </div>
@@ -162,7 +341,8 @@ const Schedule = () => {
         ) : (
           <ScheduleCalendar 
             events={events} 
-            onEventClick={setSelectedEvent}
+            onEventClick={handleEventClick}
+            userRole={user?.role}
             viewType={viewType}
             currentDate={currentDate}
           />
@@ -172,6 +352,8 @@ const Schedule = () => {
         <EventModal 
           event={selectedEvent} 
           onClose={() => setSelectedEvent(null)}
+          onReserve={handleReserve}
+          onUnregister={handleUnregister}
         />
       )}
       {showDatePicker && (

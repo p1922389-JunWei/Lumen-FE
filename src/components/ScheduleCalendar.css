@@ -88,11 +88,43 @@
   margin-bottom: 6px;
   border-left: 3px solid #4A90E2;
   transition: all 0.2s;
+  position: relative;
+}
+
+.event-card.user-registered {
+  border-left: 3px solid #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 .event-card:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transform: translateY(-2px);
+}
+
+.event-header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.event-indicator {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.registration-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: auto;
 }
 
 .event-time {
@@ -192,6 +224,12 @@
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  position: relative;
+}
+
+.month-event.user-registered {
+  border-left: 2px solid #4caf50;
+  background-color: rgba(76, 175, 80, 0.1) !important;
   overflow: hidden;
 }
 
@@ -210,6 +248,12 @@
 
 .month-event:hover {
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.month-event-indicator {
+  font-size: 10px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .month-event-time {
