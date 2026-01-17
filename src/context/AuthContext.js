@@ -74,6 +74,30 @@ export const AuthProvider = ({ children }) => {
     return await login(email, password);
   };
 
+  // Step 1: Check or create participant account and send OTP
+  const checkOrCreateParticipant = async (phoneNumber, fullName, birthdate) => {
+    try {
+      const response = await fetch('http://localhost:3001/api/participant/check-or-create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber, fullName, birthdate }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to verify credentials');
+      }
+
+      return { success: true, isNewUser: data.isNewUser, message: data.message };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Step 2: Verify OTP and complete login
   const loginWithOtp = async (phone, otp) => {
     try {
       const response = await fetch('http://localhost:3001/api/login-otp', {
@@ -84,11 +108,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ phone, otp }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Invalid OTP');
+        throw new Error(data.error || 'Invalid OTP');
       }
 
-      const data = await response.json();
       if (data.success && data.token) {
         setUser(data.data);
         localStorage.setItem('user', JSON.stringify(data.data));
@@ -97,20 +122,12 @@ export const AuthProvider = ({ children }) => {
       }
       throw new Error('Login failed');
     } catch (error) {
-      // Fallback for demo - accept OTP 123456
-      if (otp === '123456') {
-        const demoUser = { userID: 1, fullName: 'Demo Participant', phone: phone, role: 'participant' };
-        setUser(demoUser);
-        localStorage.setItem('user', JSON.stringify(demoUser));
-        localStorage.setItem('token', 'demo-token');
-        return { success: true };
-      }
       return { success: false, error: error.message };
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginWithEmail, loginWithOtp, loading, getToken, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, loginWithEmail, checkOrCreateParticipant, loginWithOtp, loading, getToken, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

@@ -127,22 +127,34 @@ const styles = {
 
 const ChoiceGate = () => {
   const { t } = useLanguage();
-  const { loginWithOtp, loginWithEmail } = useAuth();
+  const { checkOrCreateParticipant, loginWithOtp, loginWithEmail } = useAuth();
   const navigate = useNavigate();
   
   const [step, setStep] = useState('choice');
   const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [birthdate, setBirthdate] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSendOtp = () => {
-    if (phone.length >= 8) {
-      setOtpSent(true);
+  const handleSendOtp = async () => {
+    if (phone.length >= 8 && fullName && birthdate) {
+      setLoading(true);
       setError('');
+      const result = await checkOrCreateParticipant(phone, fullName, birthdate);
+      setLoading(false);
+      
+      if (result.success) {
+        setOtpSent(true);
+        setIsNewUser(result.isNewUser);
+      } else {
+        setError(result.error || t('login.loginError'));
+      }
     }
   };
 
@@ -177,6 +189,7 @@ const ChoiceGate = () => {
     setError('');
     setOtpSent(false);
     setOtp('');
+    setIsNewUser(false);
   };
 
   return (
@@ -250,31 +263,58 @@ const ChoiceGate = () => {
                 </h2>
               </div>
 
-              <div style={styles.formGroup}>
-                <Input
-                  label={t('login.phoneLabel')}
-                  placeholder={t('login.phonePlaceholder')}
-                  type="tel"
-                  size="lg"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={otpSent}
-                />
-              </div>
-
               {!otpSent ? (
-                <Button 
-                  variant="primary" 
-                  size="lg" 
-                  style={{ width: '100%' }}
-                  onClick={handleSendOtp}
-                  disabled={phone.length < 8}
-                >
-                  {t('login.sendOtp')}
-                </Button>
+                <>
+                  <div style={styles.formGroup}>
+                    <Input
+                      label={t('login.fullNameLabel')}
+                      placeholder={t('login.fullNamePlaceholder')}
+                      type="text"
+                      size="lg"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={styles.formGroup}>
+                    <Input
+                      label={t('login.phoneLabel')}
+                      placeholder={t('login.phonePlaceholder')}
+                      type="tel"
+                      size="lg"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={styles.formGroup}>
+                    <Input
+                      label={t('login.birthdateLabel')}
+                      placeholder={t('login.birthdatePlaceholder')}
+                      type="date"
+                      size="lg"
+                      value={birthdate}
+                      onChange={(e) => setBirthdate(e.target.value)}
+                    />
+                  </div>
+
+                  {error && <p style={styles.errorMessage}>{error}</p>}
+
+                  <Button 
+                    variant="primary" 
+                    size="lg" 
+                    style={{ width: '100%' }}
+                    onClick={handleSendOtp}
+                    disabled={phone.length < 8 || !fullName || !birthdate || loading}
+                  >
+                    {loading ? t('common.loading') : t('login.sendOtp')}
+                  </Button>
+                </>
               ) : (
                 <>
-                  <p style={styles.successMessage}>{t('login.otpSent')}</p>
+                  <p style={styles.successMessage}>
+                    {isNewUser ? t('login.accountCreatedOtpSent') : t('login.otpSent')}
+                  </p>
                   <div style={styles.formGroup}>
                     <Input
                       label={t('login.otpLabel')}
