@@ -94,7 +94,8 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
               </div>
             </div>
           )}
-/* Staff View: Show registered participants and volunteers */}
+
+          {/* Staff View: Show registered participants and volunteers */}
           {user?.role === 'staff' && (
             <>
               {event.participants && event.participants.length > 0 && (
@@ -131,7 +132,6 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
             </>
           )}
 
-          {
           {(user?.role === 'participant' || user?.role === 'volunteer') && (
             <div className="section">
               <h4>Availability</h4>
@@ -144,6 +144,26 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
                 )}
               </div>
             </div>
+          )}
+
+          {event.disabled_friendly && (
+            <div className="section">
+              <div className="badge" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}>
+                <Accessibility size={16} />
+                <span>Disabled Friendly</span>
+              </div>
+            </div>
+          )}
+
+          {event.notes && (
+            <div className="section">
+              <h4>Additional Information</h4>
+              <p>{event.notes}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer">
           {user?.role === 'staff' ? (
             <>
               <button className="btn btn-cancel" onClick={onClose}>Close</button>
@@ -169,43 +189,6 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
           ) : (
             <button className="btn btn-cancel" onClick={onClose}>Close</button>
           )}
-            <div className="section">
-              <div className="badge" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}>
-                <Accessibility size={16} />
-                <span>Disabled Friendly</span>
-              </div>
-            </div>
-          )}
-
-          {event.notes && (
-            <div className="section">
-              <h4>Additional Information</h4>
-              <p>{event.notes}</p>
-            </div>
-          )}
-
-          {event.files && event.files.length > 0 && (
-            <div className="section">
-              <h4>Files</h4>
-              <div className="files-list">
-                {event.files.map((file, idx) => (
-                  <div key={idx} className="file-item">
-                    <span className="file-icon">📄</span>
-                    <div className="file-info">
-                      <div className="file-name">{file.name}</div>
-                      <div className="file-date">{file.date}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="modal-footer">
-          <button className="btn btn-cancel">Cancel</button>
-          <button className="btn btn-reschedule">Reschedule</button>
-          <button className="btn btn-start">Start Session</button>
         </div>
       </div>
     </div>

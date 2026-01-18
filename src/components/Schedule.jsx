@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Search, Settings } from 'lucide-react';
 import './Schedule.css';
 import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
@@ -115,7 +116,6 @@ const Schedule = () => {
           } else if (event.location.toLowerCase().includes('hospital') || event.location.toLowerCase().includes('clinic')) {
             eventType = 'Meeting';
           } else {
-            isUserRegistered: userRegisteredEvents.includes(event.eventID),
             eventType = 'Event';
           }
 
@@ -235,8 +235,8 @@ const Schedule = () => {
 
       if (data.success) {
         alert('Successfully reserved!');
-        // Refresh UserRegisteredEvents();
-        await fetchevents and event details
+        // Refresh events and user registered events
+        await fetchUserRegisteredEvents();
         await fetchEvents();
         const updatedEvent = await fetchEventDetails(eventId);
         setSelectedEvent(updatedEvent);
@@ -265,8 +265,8 @@ const Schedule = () => {
 
       if (data.success) {
         alert('Successfully unregistered!');
-        // Refresh UserRegisteredEvents();
-        await fetchevents and event details
+        // Refresh events and user registered events
+        await fetchUserRegisteredEvents();
         await fetchEvents();
         const updatedEvent = await fetchEventDetails(eventId);
         setSelectedEvent(updatedEvent);
@@ -276,25 +276,6 @@ const Schedule = () => {
     } catch (error) {
       console.error('Error unregistering:', error);
       alert('Failed to unregister');
-    }
-  };
-            day: dayLabels[eventDate.getDay()],
-            date: eventDate.getDate(),
-            fullDate: eventDate,
-            description: event.eventDescription,
-            location: event.location,
-            notes: event.additional_information,
-            disabled_friendly: event.disabled_friendly,
-            eventData: event // Keep original data for modal
-          };
-        });
-        
-        setEvents(transformedEvents);
-      }
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -329,8 +310,8 @@ const Schedule = () => {
               <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
             <div className="header-actions">
-              <button className="search-btn">🔍</button>
-              <button className="settings-btn">⚙️</button>
+              <button className="search-btn"><Search size={18} /></button>
+              <button className="settings-btn"><Settings size={18} /></button>
             </div>
           </div>
         </div>

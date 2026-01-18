@@ -1,4 +1,5 @@
 import React from 'react';
+import { Video, Phone, Home, Calendar, Building2, MapPin, Circle, Check } from 'lucide-react';
 import './ScheduleCalendar.css';
 
 const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date(), userRole }) => {
@@ -91,14 +92,15 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
   };
 
   const getEventIcon = (type) => {
+    const iconProps = { size: 14 };
     const icons = {
-      'Video Call': '📹',
-      'Audio Call': '📞',
-      'Home Visit': '🏠',
-      'Meeting': '📅',
-      'Hospital': '🏥'
+      'Video Call': <Video {...iconProps} />,
+      'Audio Call': <Phone {...iconProps} />,
+      'Home Visit': <Home {...iconProps} />,
+      'Meeting': <Calendar {...iconProps} />,
+      'Hospital': <Building2 {...iconProps} />
     };
-    return icons[type] || '📌';
+    return icons[type] || <MapPin {...iconProps} />;
   };
 
   const getEventsForDate = (fullDate) => {
@@ -120,11 +122,11 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     const volunteersFull = (event.registered_volunteers || 0) >= (event.max_volunteers || 5);
     
     if (participantsFull && volunteersFull) {
-      return '🔴'; // Full
+      return <Circle size={10} fill="#ef4444" color="#ef4444" />; // Full
     } else if (participantsFull || volunteersFull) {
-      return '🟡'; // Partially full
+      return <Circle size={10} fill="#eab308" color="#eab308" />; // Partially full
     }
-    return '🟢'; // Available
+    return <Circle size={10} fill="#22c55e" color="#22c55e" />; // Available
   };
 
   const getRegistrationBadge = (event) => {
@@ -134,7 +136,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     }
     
     if (event.isUserRegistered) {
-      return '✓'; // Checkmark for registered events
+      return <Check size={12} color="#22c55e" />; // Checkmark for registered events
     }
     return null;
   };
@@ -154,14 +156,11 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
           {weekDayLabels.map((day, idx) => (
             <div key={idx} className="month-day-label">{day}</div>
           ))}
-        </div>{`month-event ${event.isUserRegistered ? 'user-registered' : ''}`}
-                    style={{ backgroundColor: getEventColor(event.type) }}
-                    onClick={() => onEventClick(event)}
-                  >
-                    <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
-                    {getRegistrationBadge(event) && (
-                      <span className="registration-badge">{getRegistrationBadge(event)}</span>
-                    )}
+        </div>
+        <div className="month-grid">
+          {monthDays.map((day, idx) => (
+            <div
+              key={idx}
               className={`month-day-cell ${!day.isCurrentMonth ? 'other-month' : ''} ${isToday(day.fullDate) ? 'today' : ''}`}
             >
               <div className="month-day-number">{day.date}</div>
@@ -169,11 +168,14 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                 {getEventsForDate(day.fullDate).slice(0, 3).map(event => (
                   <div
                     key={event.id}
-                    className="month-event"
+                    className={`month-event ${event.isUserRegistered ? 'user-registered' : ''}`}
                     style={{ backgroundColor: getEventColor(event.type) }}
                     onClick={() => onEventClick(event)}
                   >
                     <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
+                    {getRegistrationBadge(event) && (
+                      <span className="registration-badge">{getRegistrationBadge(event)}</span>
+                    )}
                     <span className="month-event-time">{event.time}</span>
                     <span className="month-event-title">{event.title}</span>
                   </div>
@@ -226,7 +228,10 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
               
               return (
                 <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
-                  {eventsForSlot{`event-card ${event.isUserRegistered ? 'user-registered' : ''}`}
+                  {eventsForSlot.map(event => (
+                    <div
+                      key={event.id}
+                      className={`event-card ${event.isUserRegistered ? 'user-registered' : ''}`}
                       style={{ backgroundColor: getEventColor(event.type) }}
                       onClick={() => onEventClick(event)}
                     >
@@ -235,9 +240,6 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                         {getRegistrationBadge(event) && (
                           <span className="registration-badge">{getRegistrationBadge(event)}</span>
                         )}
-                    >
-                      <div className="event-header-row">
-                        <span className="event-indicator">{getCapacityIndicator(event)}</span>
                         <div className="event-time">{event.time}</div>
                       </div>
                       <div className="event-title">{event.title}</div>
