@@ -3,16 +3,7 @@ import './ScheduleCalendar.css';
 
 const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date(), userRole }) => {
   const timeSlots = [
-    '8 AM',
-    '9 AM',
-    '10 AM',
-    '11 AM',
-    'Noon',
-    '1 PM',
-    '2 PM',
-    '3 PM',
-    '4 PM',
-    '5 PM',
+    '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
   ];
 
   const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -90,17 +81,6 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     return colors[type] || '#F0F0F0';
   };
 
-  const getEventIcon = (type) => {
-    const icons = {
-      'Video Call': '📹',
-      'Audio Call': '📞',
-      'Home Visit': '🏠',
-      'Meeting': '📅',
-      'Hospital': '🏥'
-    };
-    return icons[type] || '📌';
-  };
-
   const getEventsForDate = (fullDate) => {
     return events.filter(event => {
       // Match by full date if event has fullDate
@@ -108,10 +88,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
         const eventDate = new Date(event.fullDate);
         return eventDate.toDateString() === fullDate.toDateString();
       }
-      // Fallback for events with just date number (legacy support)
-      return event.date === fullDate.getDate() && 
-             fullDate.getMonth() === 0 && 
-             fullDate.getFullYear() === 2026;
+      return false;
     });
   };
 
@@ -128,15 +105,8 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
   };
 
   const getRegistrationBadge = (event) => {
-    // Only show for participants and volunteers
-    if (userRole !== 'participant' && userRole !== 'volunteer') {
-      return null;
-    }
-    
-    if (event.isUserRegistered) {
-      return '✓'; // Checkmark for registered events
-    }
-    return null;
+    if (userRole !== 'participant' && userRole !== 'volunteer') return null;
+    return event.isUserRegistered;
   };
 
   const isToday = (fullDate) => {
@@ -154,14 +124,11 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
           {weekDayLabels.map((day, idx) => (
             <div key={idx} className="month-day-label">{day}</div>
           ))}
-        </div>{`month-event ${event.isUserRegistered ? 'user-registered' : ''}`}
-                    style={{ backgroundColor: getEventColor(event.type) }}
-                    onClick={() => onEventClick(event)}
-                  >
-                    <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
-                    {getRegistrationBadge(event) && (
-                      <span className="registration-badge">{getRegistrationBadge(event)}</span>
-                    )}
+        </div>
+        <div className="month-grid">
+          {monthDays.map((day, idx) => (
+            <div 
+              key={idx} 
               className={`month-day-cell ${!day.isCurrentMonth ? 'other-month' : ''} ${isToday(day.fullDate) ? 'today' : ''}`}
             >
               <div className="month-day-number">{day.date}</div>
@@ -169,11 +136,10 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                 {getEventsForDate(day.fullDate).slice(0, 3).map(event => (
                   <div
                     key={event.id}
-                    className="month-event"
+                    className={`month-event ${event.isUserRegistered ? 'user-registered' : ''}`}
                     style={{ backgroundColor: getEventColor(event.type) }}
                     onClick={() => onEventClick(event)}
                   >
-                    <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
                     <span className="month-event-time">{event.time}</span>
                     <span className="month-event-title">{event.title}</span>
                   </div>
@@ -212,7 +178,6 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
             <div className="time-slot">{time}</div>
             {days.map((day, dayIdx) => {
               const dayEvents = getEventsForDate(day.fullDate);
-              // Show events that match this time slot or are close to it
               const eventsForSlot = dayEvents.filter(event => {
                 if (!event.fullDate) return false;
                 const eventDate = new Date(event.fullDate);
@@ -220,24 +185,19 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                 const slotHour = time === 'Noon' ? 12 : parseInt(time);
                 const isPM = time.includes('PM');
                 const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === 'Noon' ? 12 : slotHour);
-                // Show event if it's in this hour or within 1 hour range
-                return Math.abs(eventHour - actualHour) <= 1;
+                return Math.abs(eventHour - actualHour) <= 0;
               });
               
               return (
                 <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
-                  {eventsForSlot{`event-card ${event.isUserRegistered ? 'user-registered' : ''}`}
+                  {eventsForSlot.map((event) => (
+                    <div 
+                      key={event.id}
+                      className={`event-card ${event.isUserRegistered ? 'user-registered' : ''}`}
                       style={{ backgroundColor: getEventColor(event.type) }}
                       onClick={() => onEventClick(event)}
                     >
                       <div className="event-header-row">
-                        <span className="event-indicator">{getCapacityIndicator(event)}</span>
-                        {getRegistrationBadge(event) && (
-                          <span className="registration-badge">{getRegistrationBadge(event)}</span>
-                        )}
-                    >
-                      <div className="event-header-row">
-                        <span className="event-indicator">{getCapacityIndicator(event)}</span>
                         <div className="event-time">{event.time}</div>
                       </div>
                       <div className="event-title">{event.title}</div>

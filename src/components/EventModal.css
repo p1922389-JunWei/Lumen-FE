@@ -178,7 +178,8 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
 }
 
 .btn-cancel {
@@ -215,6 +216,40 @@
   gap: 8px;
   font-size: 14px;
   color: #666;
+  transition: all 0.3s ease;
+}
+
+.capacity-item.capacity-update {
+  animation: capacityPulse 0.5s ease-out;
+}
+
+.capacity-number {
+  color: #4A90E2;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.capacity-update .capacity-number {
+  animation: numberHighlight 0.5s ease-out;
+}
+
+@keyframes capacityPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes numberHighlight {
+  0%, 100% {
+    color: #4A90E2;
+  }
+  50% {
+    color: #10b981;
+    transform: scale(1.2);
+  }
 }
 
 .registered-list {
@@ -247,17 +282,94 @@
 .btn-reserve {
   background-color: #4caf50;
   color: white;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
 }
 
 .btn-reserve:hover:not(:disabled) {
   background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-reserve:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
 }
 
 .btn-unregister {
   background-color: #dc3545;
   color: white;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
 
 .btn-unregister:hover:not(:disabled) {
   background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-unregister:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.registration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.registration-badge.badge-pulse {
+  animation: fadeIn 0.3s ease-out, pulse 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.6);
+  }
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

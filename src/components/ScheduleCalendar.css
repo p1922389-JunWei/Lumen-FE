@@ -92,8 +92,22 @@
 }
 
 .event-card.user-registered {
-  border-left: 3px solid #4caf50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+  border-left: 3px solid #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  animation: eventRegistered 0.5s ease-out;
+}
+
+@keyframes eventRegistered {
+  0% {
+    box-shadow: 0 0 0 0px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  }
 }
 
 .event-card:hover {
@@ -113,19 +127,6 @@
   line-height: 1;
 }
 
-.registration-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: bold;
-  margin-left: auto;
-}
 
 .event-time {
   font-size: 12px;
@@ -228,9 +229,11 @@
 }
 
 .month-event.user-registered {
-  border-left: 2px solid #4caf50;
-  background-color: rgba(76, 175, 80, 0.1) !important;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+  border-left: 2px solid #10b981;
   overflow: hidden;
+  animation: eventRegistered 0.5s ease-out;
+  font-weight: 600;
 }
 
 .month-event {

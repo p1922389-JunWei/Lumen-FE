@@ -4,6 +4,7 @@ import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
+import Toast from './Toast';
 import { useAuth } from '../context/AuthContext';
 
 const Schedule = () => {
@@ -15,6 +16,7 @@ const Schedule = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
+  const [toast, setToast] = useState(null);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -61,14 +63,19 @@ const Schedule = () => {
   };
 
   useEffect(() => {
-    fetchEvents();
-    if (user && (user.role === 'participant' || user.role === 'volunteer')) {
-      fetchUserRegisteredEvents();
-    }
+    const loadData = async () => {
+      if (user && (user.role === 'participant' || user.role === 'volunteer')) {
+        const registeredIds = await fetchUserRegisteredEvents();
+        await fetchEvents(registeredIds);
+      } else {
+        await fetchEvents([]);
+      }
+    };
+    loadData();
   }, [user]);
 
   const fetchUserRegisteredEvents = async () => {
-    if (!user) return;
+    if (!user) return [];
     
     try {
       const endpoint = user.role === 'participant'
@@ -80,32 +87,36 @@ const Schedule = () => {
       
       if (data.success) {
         // Store just the event IDs for quick lookup
-        setUserRegisteredEvents(data.data.map(e => e.eventID));
+        const registeredIds = data.data.map(e => e.eventID);
+        setUserRegisteredEvents(registeredIds);
+        return registeredIds;
       }
     } catch (error) {
       console.error('Error fetching user registered events:', error);
     }
+    return [];
   };
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (registeredEventIds = null) => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3001/api/events');
       const data = await response.json();
+      
+      // Use provided registeredEventIds or fall back to state
+      const registeredIds = registeredEventIds !== null ? registeredEventIds : userRegisteredEvents;
       
       if (data.success) {
         // Transform API events to calendar format
         const transformedEvents = data.data.map(event => {
           const eventDate = new Date(event.datetime);
           const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-          
           // Format time (e.g., "9:00 AM")
           const hours = eventDate.getHours();
           const minutes = eventDate.getMinutes();
           const ampm = hours >= 12 ? 'PM' : 'AM';
           const displayHours = hours % 12 || 12;
           const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-          
           // Determine event type based on location or description
           let eventType = 'Event';
           if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {
@@ -114,11 +125,7 @@ const Schedule = () => {
             eventType = 'Video Call';
           } else if (event.location.toLowerCase().includes('hospital') || event.location.toLowerCase().includes('clinic')) {
             eventType = 'Meeting';
-          } else {
-            isUserRegistered: userRegisteredEvents.includes(event.eventID),
-            eventType = 'Event';
           }
-
           return {
             id: event.eventID,
             title: event.eventName,
@@ -136,10 +143,10 @@ const Schedule = () => {
             max_volunteers: event.max_volunteers,
             registered_participants: event.registered_participants,
             registered_volunteers: event.registered_volunteers,
+            isUserRegistered: registeredIds.includes(event.eventID),
             eventData: event // Keep original data for modal
           };
         });
-        
         setEvents(transformedEvents);
       }
     } catch (error) {
@@ -192,7 +199,8 @@ const Schedule = () => {
           registered_participants: event.registered_participants,
           registered_volunteers: event.registered_volunteers,
           participants: event.participants,
-          volunteers: event.volunteers
+          volunteers: event.volunteers,
+          isUserRegistered: userRegisteredEvents.includes(event.eventID)
         };
       }
     } catch (error) {
@@ -209,7 +217,7 @@ const Schedule = () => {
 
   const handleReserve = async (eventId) => {
     if (!user) {
-      alert('Please log in to reserve a spot');
+      setToast({ message: 'Please log in to reserve a spot', type: 'error' });
       return;
     }
 
@@ -234,18 +242,27 @@ const Schedule = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert('Successfully reserved!');
-        // Refresh UserRegisteredEvents();
-        await fetchevents and event details
-        await fetchEvents();
+        setToast({ 
+          message: 'Successfully registered for the event!', 
+          type: 'success' 
+        });
+        // Refresh user registered events first, then fetch all events to update calendar
+        const registeredIds = await fetchUserRegisteredEvents();
+        await fetchEvents(registeredIds);
         const updatedEvent = await fetchEventDetails(eventId);
         setSelectedEvent(updatedEvent);
       } else {
-        alert(data.error || 'Failed to reserve spot');
+        setToast({ 
+          message: data.error || 'Failed to reserve spot', 
+          type: 'error' 
+        });
       }
     } catch (error) {
       console.error('Error reserving:', error);
-      alert('Failed to reserve spot');
+      setToast({ 
+        message: 'Failed to reserve spot. Please try again.', 
+        type: 'error' 
+      });
     }
   };
 
@@ -264,37 +281,27 @@ const Schedule = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert('Successfully unregistered!');
-        // Refresh UserRegisteredEvents();
-        await fetchevents and event details
-        await fetchEvents();
+        setToast({ 
+          message: 'Successfully unregistered from the event', 
+          type: 'info' 
+        });
+        // Refresh user registered events first, then fetch all events to update calendar
+        const registeredIds = await fetchUserRegisteredEvents();
+        await fetchEvents(registeredIds);
         const updatedEvent = await fetchEventDetails(eventId);
         setSelectedEvent(updatedEvent);
       } else {
-        alert(data.error || 'Failed to unregister');
+        setToast({ 
+          message: data.error || 'Failed to unregister', 
+          type: 'error' 
+        });
       }
     } catch (error) {
       console.error('Error unregistering:', error);
-      alert('Failed to unregister');
-    }
-  };
-            day: dayLabels[eventDate.getDay()],
-            date: eventDate.getDate(),
-            fullDate: eventDate,
-            description: event.eventDescription,
-            location: event.location,
-            notes: event.additional_information,
-            disabled_friendly: event.disabled_friendly,
-            eventData: event // Keep original data for modal
-          };
-        });
-        
-        setEvents(transformedEvents);
-      }
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
+      setToast({ 
+        message: 'Failed to unregister. Please try again.', 
+        type: 'error' 
+      });
     }
   };
 
@@ -340,6 +347,7 @@ const Schedule = () => {
           </div>
         ) : (
           <ScheduleCalendar 
+            key={`calendar-${events.length}-${userRegisteredEvents.join(',')}`}
             events={events} 
             onEventClick={handleEventClick}
             userRole={user?.role}
@@ -364,6 +372,13 @@ const Schedule = () => {
             setShowDatePicker(false);
           }}
           onClose={() => setShowDatePicker(false)}
+        />
+      )}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
