@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './ScheduleCalendar.css';
 
 const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date(), userRole }) => {
+  const calendarGridRef = useRef(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every minute to move the indicator
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(timer);
+  }, []);
   const timeSlots = [
-    '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
+    '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 
+    'Noon', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM'
   ];
 
   const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -172,7 +184,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
         ))}
       </div>
 
-      <div className="calendar-grid">
+      <div className="calendar-grid" ref={calendarGridRef}>
         {timeSlots.map((time, timeIdx) => (
           <div key={timeIdx} className="time-row">
             <div className="time-slot">{time}</div>
