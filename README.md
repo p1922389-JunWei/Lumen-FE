@@ -34,17 +34,26 @@ A streamlined activity management platform that reduces friction in event sign-u
    cd LUMEN-FE
    ```
 
-2. **Install dependencies**
+2. **Clone the backend repository**
+   
+   This frontend requires the backend server to be running. Clone and set up the backend:
+   ```bash
+   git clone https://github.com/p1922389-JunWei/Lumen-BE
+   cd Lumen-BE
+   ```
+   Follow the setup instructions in the [Lumen-BE repository](https://github.com/p1922389-JunWei/Lumen-BE).
+
+3. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Start the development server**
+4. **Start the development server**
    ```bash
    npm start
    ```
 
-4. **Open in browser**
+5. **Open in browser**
    ```
    http://localhost:3000
    ```
