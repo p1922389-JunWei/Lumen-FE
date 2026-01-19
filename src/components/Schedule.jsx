@@ -350,7 +350,7 @@ const Schedule = () => {
               <button className="search-btn">🔍</button>
               <button className="settings-btn">⚙️</button>
             </div>
-          </div>
+                      </div>
         </div>
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>

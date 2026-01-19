@@ -11,6 +11,7 @@ const Dashboard = () => {
   const { user, getToken } = useAuth();
   const [staffList, setStaffList] = useState([]);
   const [volunteerList, setVolunteerList] = useState([]);
+  const [participantList, setParticipantList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   
@@ -43,7 +44,10 @@ const Dashboard = () => {
         setStaffList(staffData.data || []);
       }
 
-      console.log()
+      // print out all staffs
+      console.log("All staffs:", staffData);
+      // Or use JSON.stringify to see the full structure:
+      // console.log("All staffs:", JSON.stringify(staffData, null, 2));
 
       // Fetch volunteers
       const volunteerResponse = await fetch('http://localhost:3001/api/volunteers', {
@@ -52,6 +56,15 @@ const Dashboard = () => {
       const volunteerData = await volunteerResponse.json();
       if (volunteerData.success) {
         setVolunteerList(volunteerData.data || []);
+      }
+
+      // Fetch participants
+      const participantResponse = await fetch('http://localhost:3001/api/participants', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const participantData = await participantResponse.json();
+      if (participantData.success) {
+        setParticipantList(participantData.data || []);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -241,7 +254,6 @@ const Dashboard = () => {
                     <tr>
                       <th>Name</th>
                       <th>Email</th>
-                      <th>Phone</th>
                       <th>Created Date</th>
                     </tr>
                   </thead>
@@ -260,8 +272,51 @@ const Dashboard = () => {
                             </div>
                           </td>
                           <td>{volunteer.email || '-'}</td>
-                          <td>{volunteer.phoneNumber || '-'}</td>
                           <td>{formatDate(volunteer.created_at)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Participants Table */}
+            <div className="table-section">
+              <div className="table-header">
+                <h2>
+                  <Users size={20} />
+                  Participants
+                </h2>
+                <span className="table-count participant">{participantList.length} participants</span>
+              </div>
+              <div className="table-container">
+                <table className="user-table">
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Phone Number</th>
+                      <th>Birthdate</th>
+                      <th>Created Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {participantList.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="empty-row">No participants found</td>
+                      </tr>
+                    ) : (
+                      participantList.map((participant, idx) => (
+                        <tr key={participant.participantID || idx}>
+                          <td>
+                            <div className="user-cell">
+                              <div className="user-avatar-small participant">{participant.participantID || idx + 1}</div>
+                              {participant.participantID}
+                            </div>
+                          </td>
+                          <td>{participant.phoneNumber || '-'}</td>
+                          <td>{formatDate(participant.birthdate)}</td>
+                          <td>{formatDate(participant.created_at)}</td>
                         </tr>
                       ))
                     )}

@@ -141,6 +141,15 @@
   background: #e74c3c;
 }
 
+.user-avatar-small.participant {
+  background: #9b59b6;
+}
+
+.table-count.participant {
+  background: #f3e8ff;
+  color: #9b59b6;
+}
+
 /* FAB Button */
 .fab-button {
   position: fixed;
