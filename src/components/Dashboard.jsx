@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ScheduleSidebar from './ScheduleSidebar';
+import UserCard from './UserCard';
+import UserDetailModal from './UserDetailModal';
+import Toast from './Toast';
 import { 
   UserPlus, Mail, Lock, User, Shield, Check, AlertCircle, Heart, 
-  Plus, X, Users, Briefcase, Phone, Calendar
+  Plus, X, Users, Briefcase, Phone, Calendar, Search, Filter
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -14,6 +17,11 @@ const Dashboard = () => {
   const [participantList, setParticipantList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserType, setSelectedUserType] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewFilter, setViewFilter] = useState('all'); // 'all', 'staff', 'volunteer', 'participant'
   
   // Form state for creating users
   const [userType, setUserType] = useState('staff');
@@ -179,6 +187,51 @@ const Dashboard = () => {
     });
   };
 
+  const handleUserCardClick = (userInfo, type) => {
+    setSelectedUser(userInfo);
+    setSelectedUserType(type);
+  };
+
+  const handleCloseUserDetail = () => {
+    setSelectedUser(null);
+    setSelectedUserType(null);
+  };
+
+  const handleUserDetailSuccess = (message) => {
+    setToast({ show: true, message, type: 'success' });
+    fetchUsers();
+  };
+
+  // Filter and search logic
+  const filterUsers = (users, type) => {
+    return users.filter(u => {
+      const matchesSearch = 
+        u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.phoneNumber?.includes(searchTerm);
+      return matchesSearch;
+    });
+  };
+
+  const getFilteredLists = () => {
+    const filteredStaff = filterUsers(staffList, 'staff');
+    const filteredVolunteers = filterUsers(volunteerList, 'volunteer');
+    const filteredParticipants = filterUsers(participantList, 'participant');
+
+    if (viewFilter === 'all') {
+      return { staff: filteredStaff, volunteers: filteredVolunteers, participants: filteredParticipants };
+    } else if (viewFilter === 'staff') {
+      return { staff: filteredStaff, volunteers: [], participants: [] };
+    } else if (viewFilter === 'volunteer') {
+      return { staff: [], volunteers: filteredVolunteers, participants: [] };
+    } else if (viewFilter === 'participant') {
+      return { staff: [], volunteers: [], participants: filteredParticipants };
+    }
+    return { staff: filteredStaff, volunteers: filteredVolunteers, participants: filteredParticipants };
+  };
+
+  const filteredLists = getFilteredLists();
+
   return (
     <div className="schedule-container">
       <ScheduleSidebar />
@@ -196,135 +249,140 @@ const Dashboard = () => {
             <p>Loading users...</p>
           </div>
         ) : (
-          <div className="dashboard-tables">
-            {/* Staff Table */}
-            <div className="table-section">
-              <div className="table-header">
-                <h2>
-                  <Briefcase size={20} />
-                  Staff Members
-                </h2>
-                <span className="table-count">{staffList.length} members</span>
+          <>
+            {/* Search and Filter Bar */}
+            <div className="dashboard-toolbar">
+              <div className="search-box">
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Search by name, email, or phone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button className="clear-search" onClick={() => setSearchTerm('')}>
+                    <X size={16} />
+                  </button>
+                )}
               </div>
-              <div className="table-container">
-                <table className="user-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Created Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {staffList.length === 0 ? (
-                      <tr>
-                        <td colSpan="3" className="empty-row">No staff members found</td>
-                      </tr>
-                    ) : (
-                      staffList.map((staff, idx) => (
-                        <tr key={staff.staffID || idx}>
-                          <td>
-                            <div className="user-cell">
-                              <div className="user-avatar-small">{staff.fullName?.charAt(0) || 'S'}</div>
-                              {staff.fullName}
-                            </div>
-                          </td>
-                          <td>{staff.email || '-'}</td>
-                          <td>{formatDate(staff.created_at)}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Volunteers Table */}
-            <div className="table-section">
-              <div className="table-header">
-                <h2>
-                  <Heart size={20} />
+              <div className="filter-buttons">
+                <button 
+                  className={`filter-btn ${viewFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setViewFilter('all')}
+                >
+                  All
+                </button>
+                <button 
+                  className={`filter-btn staff ${viewFilter === 'staff' ? 'active' : ''}`}
+                  onClick={() => setViewFilter('staff')}
+                >
+                  <Shield size={14} />
+                  Staff
+                </button>
+                <button 
+                  className={`filter-btn volunteer ${viewFilter === 'volunteer' ? 'active' : ''}`}
+                  onClick={() => setViewFilter('volunteer')}
+                >
+                  <Heart size={14} />
                   Volunteers
-                </h2>
-                <span className="table-count">{volunteerList.length} volunteers</span>
-              </div>
-              <div className="table-container">
-                <table className="user-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Created Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {volunteerList.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="empty-row">No volunteers found</td>
-                      </tr>
-                    ) : (
-                      volunteerList.map((volunteer, idx) => (
-                        <tr key={volunteer.volunteerID || idx}>
-                          <td>
-                            <div className="user-cell">
-                              <div className="user-avatar-small volunteer">{volunteer.fullName?.charAt(0) || 'V'}</div>
-                              {volunteer.fullName}
-                            </div>
-                          </td>
-                          <td>{volunteer.email || '-'}</td>
-                          <td>{formatDate(volunteer.created_at)}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                </button>
+                <button 
+                  className={`filter-btn participant ${viewFilter === 'participant' ? 'active' : ''}`}
+                  onClick={() => setViewFilter('participant')}
+                >
+                  <Users size={14} />
+                  Participants
+                </button>
               </div>
             </div>
 
-            {/* Participants Table */}
-            <div className="table-section">
-              <div className="table-header">
-                <h2>
-                  <Users size={20} />
-                  Participants
-                </h2>
-                <span className="table-count participant">{participantList.length} participants</span>
-              </div>
-              <div className="table-container">
-                <table className="user-table">
-                  <thead>
-                    <tr>
-                      <th>User ID</th>
-                      <th>Phone Number</th>
-                      <th>Birthdate</th>
-                      <th>Created Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {participantList.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="empty-row">No participants found</td>
-                      </tr>
-                    ) : (
-                      participantList.map((participant, idx) => (
-                        <tr key={participant.participantID || idx}>
-                          <td>
-                            <div className="user-cell">
-                              <div className="user-avatar-small participant">{participant.participantID || idx + 1}</div>
-                              {participant.participantID}
-                            </div>
-                          </td>
-                          <td>{participant.phoneNumber || '-'}</td>
-                          <td>{formatDate(participant.birthdate)}</td>
-                          <td>{formatDate(participant.created_at)}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <div className="dashboard-cards-section">
+              {/* Staff Cards */}
+              {(viewFilter === 'all' || viewFilter === 'staff') && filteredLists.staff.length > 0 && (
+                <div className="user-section">
+                  <div className="section-header">
+                    <h2>
+                      <Briefcase size={20} />
+                      Staff Members
+                    </h2>
+                    <span className="section-count">{filteredLists.staff.length}</span>
+                  </div>
+                  <div className="user-cards-list">
+                    {filteredLists.staff.map((staff, idx) => (
+                      <UserCard
+                        key={staff.staffID || idx}
+                        user={staff}
+                        userType="staff"
+                        onClick={handleUserCardClick}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Volunteer Cards */}
+              {(viewFilter === 'all' || viewFilter === 'volunteer') && filteredLists.volunteers.length > 0 && (
+                <div className="user-section">
+                  <div className="section-header">
+                    <h2>
+                      <Heart size={20} />
+                      Volunteers
+                    </h2>
+                    <span className="section-count volunteer">{filteredLists.volunteers.length}</span>
+                  </div>
+                  <div className="user-cards-list">
+                    {filteredLists.volunteers.map((volunteer, idx) => (
+                      <UserCard
+                        key={volunteer.volunteerID || idx}
+                        user={volunteer}
+                        userType="volunteer"
+                        onClick={handleUserCardClick}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Participant Cards */}
+              {(viewFilter === 'all' || viewFilter === 'participant') && filteredLists.participants.length > 0 && (
+                <div className="user-section">
+                  <div className="section-header">
+                    <h2>
+                      <Users size={20} />
+                      Participants
+                    </h2>
+                    <span className="section-count participant">{filteredLists.participants.length}</span>
+                  </div>
+                  <div className="user-cards-list">
+                    {filteredLists.participants.map((participant, idx) => (
+                      <UserCard
+                        key={participant.participantID || idx}
+                        user={participant}
+                        userType="participant"
+                        onClick={handleUserCardClick}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {filteredLists.staff.length === 0 && 
+               filteredLists.volunteers.length === 0 && 
+               filteredLists.participants.length === 0 && (
+                <div className="empty-state">
+                  <Users size={48} />
+                  <h3>No users found</h3>
+                  <p>
+                    {searchTerm 
+                      ? `No users match "${searchTerm}"`
+                      : 'No users in this category yet'}
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
+          </>
         )}
 
         {/* FAB Button */}
@@ -426,6 +484,25 @@ const Dashboard = () => {
               </form>
             </div>
           </div>
+        )}
+
+        {/* User Detail Modal */}
+        {selectedUser && (
+          <UserDetailModal
+            userInfo={selectedUser}
+            userType={selectedUserType}
+            onClose={handleCloseUserDetail}
+            onSuccess={handleUserDetailSuccess}
+          />
+        )}
+
+        {/* Toast Notifications */}
+        {toast.show && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast({ show: false, message: '', type: '' })}
+          />
         )}
       </div>
     </div>
