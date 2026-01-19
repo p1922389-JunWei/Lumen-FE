@@ -3,7 +3,7 @@ import './ScheduleCalendar.css';
 
 const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date(), userRole }) => {
   const timeSlots = [
-    '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
+    '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
   ];
 
   const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -182,9 +182,9 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                 if (!event.fullDate) return false;
                 const eventDate = new Date(event.fullDate);
                 const eventHour = eventDate.getHours();
-                const slotHour = time === 'Noon' ? 12 : parseInt(time);
+                const slotHour = time === '12 PM' ? 12 : parseInt(time);
                 const isPM = time.includes('PM');
-                const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === 'Noon' ? 12 : slotHour);
+                const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === '12 PM' ? 12 : slotHour);
                 return Math.abs(eventHour - actualHour) <= 0;
               });
               
