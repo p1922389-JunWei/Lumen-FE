@@ -55,13 +55,13 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
         // Optimistically update UI for unregister
         setOptimisticRegistered(false);
         await onUnregister?.(event.id);
+        onClose(); // Close modal after successful unregister
       } else {
         // Optimistically update UI for register
         setOptimisticRegistered(true);
         setShowSuccessAnimation(true);
         await onReserve?.(event.id);
-        // Keep success animation visible briefly
-        setTimeout(() => setShowSuccessAnimation(false), 1000);
+        onClose(); // Close modal after successful register
       }
     } catch (error) {
       // Revert optimistic update on error
