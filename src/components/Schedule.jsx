@@ -335,11 +335,7 @@ const Schedule = () => {
               <button className="nav-btn" onClick={navigateNext}>›</button>
               <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
-            <div className="header-actions">
-              <button className="search-btn">🔍</button>
-              <button className="settings-btn">⚙️</button>
-            </div>
-          </div>
+                      </div>
         </div>
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>

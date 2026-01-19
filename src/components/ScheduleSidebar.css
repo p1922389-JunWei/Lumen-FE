@@ -1,86 +1,119 @@
 .sidebar {
-  width: 240px;
-  background-color: #f8f8f8;
-  border-right: 1px solid #e0e0e0;
+  width: 260px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   height: 100vh;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-logo {
-  padding: 20px 16px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 24px 20px;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  background: white;
 }
 
 .sidebar-logo .logo-icon {
   color: #4A90E2;
+  filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.2));
 }
 
 .sidebar-logo h2 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #4A90E2;
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 12px 0;
+  padding: 16px 12px;
   overflow-y: auto;
 }
 
 .nav-item-link {
   text-decoration: none;
   color: inherit;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 14px;
+  padding: 14px 16px;
   cursor: pointer;
-  color: #666;
+  color: #64748b;
   font-size: 14px;
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  border-left: none;
+  margin: 0;
 }
 
 .nav-item:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #334155;
+  transform: translateX(4px);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.nav-item.active:hover {
+  transform: translateX(0);
 }
 
 .nav-item-link:has(.nav-item:hover) {
-  background-color: #f0f0f0;
+  background-color: transparent;
 }
 
 .sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid #e0e0e0;
+  padding: 20px;
+  border-top: 1px solid #e2e8f0;
+  background: white;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 14px;
+  transition: all 0.25s ease;
+}
+
+.user-profile:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #4A90E2;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
   font-size: 16px;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
 .user-info {
@@ -92,9 +125,9 @@
 }
 
 .user-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -103,7 +136,7 @@
 
 .user-email {
   font-size: 11px;
-  color: #888;
+  color: #64748b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -112,16 +145,19 @@
 .logout-btn {
   background: none;
   border: none;
-  padding: 0;
+  padding: 6px 10px;
   font-size: 12px;
-  color: #999;
+  color: #94a3b8;
   cursor: pointer;
   text-align: left;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .logout-btn:hover {
   color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
 }
