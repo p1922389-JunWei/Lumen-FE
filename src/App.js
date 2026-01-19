@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import ChoiceGate from './components/pages/ChoiceGate';
 import LoginSuccess from './components/pages/LoginSuccess';
 import Schedule from './components/Schedule';
+import Activity from './components/Activity';
 import Profile from './components/Profile';
 import AdminUsers from './components/AdminUsers';
 import Dashboard from './components/Dashboard';
@@ -60,6 +61,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Schedule />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/activity" 
+        element={
+          <ProtectedRoute>
+            <Activity />
           </ProtectedRoute>
         } 
       />

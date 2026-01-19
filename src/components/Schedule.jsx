@@ -5,6 +5,7 @@ import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
 import CreateEventModal from './CreateEventModal';
+import EditEventModal from './EditEventModal';
 import Toast from './Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,6 +20,7 @@ const Schedule = () => {
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
   const [toast, setToast] = useState(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -373,6 +375,10 @@ const Schedule = () => {
           onClose={() => setSelectedEvent(null)}
           onReserve={handleReserve}
           onUnregister={handleUnregister}
+          onEdit={(event) => {
+            setSelectedEvent(null);
+            setEditingEvent(event);
+          }}
         />
       )}
       {showDatePicker && (
@@ -390,6 +396,16 @@ const Schedule = () => {
           onClose={() => setShowCreateEvent(false)}
           onSuccess={() => {
             setToast({ message: 'Event created successfully!', type: 'success' });
+            fetchEvents();
+          }}
+        />
+      )}
+      {editingEvent && (
+        <EditEventModal 
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSuccess={() => {
+            setToast({ message: 'Event updated successfully!', type: 'success' });
             fetchEvents();
           }}
         />
