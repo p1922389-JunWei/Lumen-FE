@@ -29,14 +29,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Backend expects NRIC, but we'll use email field as NRIC for now
-      // In production, update the form to use NRIC field
       const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ NRIC: email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
@@ -68,6 +66,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+  };
+
+  const updateUser = (updatedData) => {
+    const newUser = { ...user, ...updatedData };
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
   };
 
   const loginWithEmail = async (email, password) => {
@@ -127,7 +131,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginWithEmail, checkOrCreateParticipant, loginWithOtp, loading, getToken, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loginWithEmail, checkOrCreateParticipant, loginWithOtp, loading, getToken, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

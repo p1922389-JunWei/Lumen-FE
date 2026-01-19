@@ -5,6 +5,9 @@ import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
+import CreateEventModal from './CreateEventModal';
+import EditEventModal from './EditEventModal';
+import Toast from './Toast';
 import { useAuth } from '../context/AuthContext';
 
 const Schedule = () => {
@@ -16,6 +19,9 @@ const Schedule = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
+  const [toast, setToast] = useState(null);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -62,14 +68,19 @@ const Schedule = () => {
   };
 
   useEffect(() => {
-    fetchEvents();
-    if (user && (user.role === 'participant' || user.role === 'volunteer')) {
-      fetchUserRegisteredEvents();
-    }
+    const loadData = async () => {
+      if (user && (user.role === 'participant' || user.role === 'volunteer')) {
+        const registeredIds = await fetchUserRegisteredEvents();
+        await fetchEvents(registeredIds);
+      } else {
+        await fetchEvents([]);
+      }
+    };
+    loadData();
   }, [user]);
 
   const fetchUserRegisteredEvents = async () => {
-    if (!user) return;
+    if (!user) return [];
     
     try {
       const endpoint = user.role === 'participant'
@@ -81,31 +92,51 @@ const Schedule = () => {
       
       if (data.success) {
         // Store just the event IDs for quick lookup
-        setUserRegisteredEvents(data.data.map(e => e.eventID));
+        const registeredIds = data.data.map(e => e.eventID);
+        setUserRegisteredEvents(registeredIds);
+        return registeredIds;
       }
     } catch (error) {
       console.error('Error fetching user registered events:', error);
     }
+    return [];
   };
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (registeredEventIds = null) => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3001/api/events');
       const data = await response.json();
       
+      // Use provided registeredEventIds or fall back to state
+      const registeredIds = registeredEventIds !== null ? registeredEventIds : userRegisteredEvents;
+      
       if (data.success) {
         // Transform API events to calendar format
         const transformedEvents = data.data.map(event => {
-          const eventDate = new Date(event.datetime);
+          const eventDate = new Date(event.start_time);
+          const endDate = event.end_time ? new Date(event.end_time) : null;
           const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-          
           // Format time (e.g., "9:00 AM")
           const hours = eventDate.getHours();
           const minutes = eventDate.getMinutes();
           const ampm = hours >= 12 ? 'PM' : 'AM';
           const displayHours = hours % 12 || 12;
           const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+          
+          // Calculate duration if end_time exists
+          let duration = '1 hour';
+          if (endDate) {
+            const diffMs = endDate - eventDate;
+            const diffMins = Math.round(diffMs / 60000);
+            if (diffMins < 60) {
+              duration = `${diffMins} min`;
+            } else {
+              const diffHours = Math.floor(diffMins / 60);
+              const remainingMins = diffMins % 60;
+              duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+            }
+          }
           
           // Determine event type based on location or description
           let eventType = 'Event';
@@ -115,15 +146,17 @@ const Schedule = () => {
             eventType = 'Video Call';
           } else if (event.location.toLowerCase().includes('hospital') || event.location.toLowerCase().includes('clinic')) {
             eventType = 'Meeting';
+<<<<<<< HEAD
           } else {
             eventType = 'Event';
+=======
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
           }
-
           return {
             id: event.eventID,
             title: event.eventName,
             time: time,
-            duration: '1 hour', // Default duration, could be calculated if stored
+            duration: duration,
             type: eventType,
             day: dayLabels[eventDate.getDay()],
             date: eventDate.getDate(),
@@ -136,10 +169,10 @@ const Schedule = () => {
             max_volunteers: event.max_volunteers,
             registered_participants: event.registered_participants,
             registered_volunteers: event.registered_volunteers,
+            isUserRegistered: registeredIds.includes(event.eventID),
             eventData: event // Keep original data for modal
           };
         });
-        
         setEvents(transformedEvents);
       }
     } catch (error) {
@@ -156,7 +189,8 @@ const Schedule = () => {
       
       if (data.success) {
         const event = data.data;
-        const eventDate = new Date(event.datetime);
+        const eventDate = new Date(event.start_time);
+        const endDate = event.end_time ? new Date(event.end_time) : null;
         const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
         
         const hours = eventDate.getHours();
@@ -164,6 +198,20 @@ const Schedule = () => {
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const displayHours = hours % 12 || 12;
         const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
+        // Calculate duration if end_time exists
+        let duration = '1 hour';
+        if (endDate) {
+          const diffMs = endDate - eventDate;
+          const diffMins = Math.round(diffMs / 60000);
+          if (diffMins < 60) {
+            duration = `${diffMins} min`;
+          } else {
+            const diffHours = Math.floor(diffMins / 60);
+            const remainingMins = diffMins % 60;
+            duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+          }
+        }
         
         let eventType = 'Event';
         if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {
@@ -192,7 +240,8 @@ const Schedule = () => {
           registered_participants: event.registered_participants,
           registered_volunteers: event.registered_volunteers,
           participants: event.participants,
-          volunteers: event.volunteers
+          volunteers: event.volunteers,
+          isUserRegistered: userRegisteredEvents.includes(event.eventID)
         };
       }
     } catch (error) {
@@ -209,7 +258,7 @@ const Schedule = () => {
 
   const handleReserve = async (eventId) => {
     if (!user) {
-      alert('Please log in to reserve a spot');
+      setToast({ message: 'Please log in to reserve a spot', type: 'error' });
       return;
     }
 
@@ -234,18 +283,34 @@ const Schedule = () => {
       const data = await response.json();
 
       if (data.success) {
+<<<<<<< HEAD
         alert('Successfully reserved!');
         // Refresh events and user registered events
         await fetchUserRegisteredEvents();
         await fetchEvents();
+=======
+        setToast({ 
+          message: 'Successfully registered for the event!', 
+          type: 'success' 
+        });
+        // Refresh user registered events first, then fetch all events to update calendar
+        const registeredIds = await fetchUserRegisteredEvents();
+        await fetchEvents(registeredIds);
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
         const updatedEvent = await fetchEventDetails(eventId);
         setSelectedEvent(updatedEvent);
       } else {
-        alert(data.error || 'Failed to reserve spot');
+        setToast({ 
+          message: data.error || 'Failed to reserve spot', 
+          type: 'error' 
+        });
       }
     } catch (error) {
       console.error('Error reserving:', error);
-      alert('Failed to reserve spot');
+      setToast({ 
+        message: 'Failed to reserve spot. Please try again.', 
+        type: 'error' 
+      });
     }
   };
 
@@ -264,18 +329,38 @@ const Schedule = () => {
       const data = await response.json();
 
       if (data.success) {
+<<<<<<< HEAD
         alert('Successfully unregistered!');
         // Refresh events and user registered events
         await fetchUserRegisteredEvents();
         await fetchEvents();
+=======
+        setToast({ 
+          message: 'Successfully unregistered from the event', 
+          type: 'info' 
+        });
+        // Refresh user registered events first, then fetch all events to update calendar
+        const registeredIds = await fetchUserRegisteredEvents();
+        await fetchEvents(registeredIds);
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
         const updatedEvent = await fetchEventDetails(eventId);
         setSelectedEvent(updatedEvent);
       } else {
-        alert(data.error || 'Failed to unregister');
+        setToast({ 
+          message: data.error || 'Failed to unregister', 
+          type: 'error' 
+        });
       }
     } catch (error) {
       console.error('Error unregistering:', error);
+<<<<<<< HEAD
       alert('Failed to unregister');
+=======
+      setToast({ 
+        message: 'Failed to unregister. Please try again.', 
+        type: 'error' 
+      });
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
     }
   };
 
@@ -310,10 +395,24 @@ const Schedule = () => {
               <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
             <div className="header-actions">
+<<<<<<< HEAD
               <button className="search-btn"><Search size={18} /></button>
               <button className="settings-btn"><Settings size={18} /></button>
+=======
+              {user?.role === 'staff' && (
+                <button 
+                  className="btn btn-create-event"
+                  onClick={() => setShowCreateEvent(true)}
+                  style={{ backgroundColor: '#4caf50', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}
+                >
+                  + Create Event
+                </button>
+              )}
+              <button className="search-btn">🔍</button>
+              <button className="settings-btn">⚙️</button>
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
             </div>
-          </div>
+                      </div>
         </div>
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
@@ -321,6 +420,7 @@ const Schedule = () => {
           </div>
         ) : (
           <ScheduleCalendar 
+            key={`calendar-${events.length}-${userRegisteredEvents.join(',')}`}
             events={events} 
             onEventClick={handleEventClick}
             userRole={user?.role}
@@ -335,6 +435,10 @@ const Schedule = () => {
           onClose={() => setSelectedEvent(null)}
           onReserve={handleReserve}
           onUnregister={handleUnregister}
+          onEdit={(event) => {
+            setSelectedEvent(null);
+            setEditingEvent(event);
+          }}
         />
       )}
       {showDatePicker && (
@@ -345,6 +449,32 @@ const Schedule = () => {
             setShowDatePicker(false);
           }}
           onClose={() => setShowDatePicker(false)}
+        />
+      )}
+      {showCreateEvent && (
+        <CreateEventModal 
+          onClose={() => setShowCreateEvent(false)}
+          onSuccess={() => {
+            setToast({ message: 'Event created successfully!', type: 'success' });
+            fetchEvents();
+          }}
+        />
+      )}
+      {editingEvent && (
+        <EditEventModal 
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSuccess={() => {
+            setToast({ message: 'Event updated successfully!', type: 'success' });
+            fetchEvents();
+          }}
+        />
+      )}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>

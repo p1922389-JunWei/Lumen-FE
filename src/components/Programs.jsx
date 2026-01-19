@@ -15,7 +15,8 @@ const Programs = () => {
     eventName: '',
     eventDescription: '',
     disabled_friendly: true,
-    datetime: '',
+    start_time: '',
+    end_time: '',
     location: '',
     additional_information: ''
   });
@@ -69,7 +70,8 @@ const Programs = () => {
           eventName: '',
           eventDescription: '',
           disabled_friendly: true,
-          datetime: '',
+          start_time: '',
+          end_time: '',
           location: '',
           additional_information: ''
         });
@@ -180,13 +182,31 @@ const Programs = () => {
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                  Date & Time *
+                  Start Time *
                 </label>
                 <input
                   type="datetime-local"
                   required
-                  value={formData.datetime}
-                  onChange={(e) => setFormData({ ...formData, datetime: e.target.value })}
+                  value={formData.start_time}
+                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
+                  End Time *
+                </label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={formData.end_time}
+                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                   style={{
                     width: '100%',
                     padding: '8px',
@@ -289,7 +309,7 @@ const Programs = () => {
                   </h3>
                   
                   <div style={{ marginBottom: '10px', color: '#666', fontSize: '14px' }}>
-                    <strong>📅</strong> {formatDateTime(event.datetime)}
+                    <strong>📅</strong> {formatDateTime(event.start_time)}
                   </div>
                   
                   <div style={{ marginBottom: '10px', color: '#666', fontSize: '14px' }}>

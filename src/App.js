@@ -5,6 +5,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import ChoiceGate from './components/pages/ChoiceGate';
 import LoginSuccess from './components/pages/LoginSuccess';
 import Schedule from './components/Schedule';
+import Activity from './components/Activity';
+import Profile from './components/Profile';
+import AdminUsers from './components/AdminUsers';
+import Dashboard from './components/Dashboard';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -61,10 +65,34 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/activity" 
+        element={
+          <ProtectedRoute>
+            <Activity />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/admin" 
         element={
           <ProtectedRoute>
-            <LoginSuccess />
+            <AdminUsers />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
           </ProtectedRoute>
         } 
       />

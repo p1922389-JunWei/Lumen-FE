@@ -4,16 +4,7 @@ import './ScheduleCalendar.css';
 
 const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate = new Date(), userRole }) => {
   const timeSlots = [
-    '8 AM',
-    '9 AM',
-    '10 AM',
-    '11 AM',
-    'Noon',
-    '1 PM',
-    '2 PM',
-    '3 PM',
-    '4 PM',
-    '5 PM',
+    '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
   ];
 
   const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -91,6 +82,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     return colors[type] || '#F0F0F0';
   };
 
+<<<<<<< HEAD
   const getEventIcon = (type) => {
     const iconProps = { size: 14 };
     const icons = {
@@ -103,6 +95,8 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
     return icons[type] || <MapPin {...iconProps} />;
   };
 
+=======
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
   const getEventsForDate = (fullDate) => {
     return events.filter(event => {
       // Match by full date if event has fullDate
@@ -110,10 +104,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
         const eventDate = new Date(event.fullDate);
         return eventDate.toDateString() === fullDate.toDateString();
       }
-      // Fallback for events with just date number (legacy support)
-      return event.date === fullDate.getDate() && 
-             fullDate.getMonth() === 0 && 
-             fullDate.getFullYear() === 2026;
+      return false;
     });
   };
 
@@ -130,6 +121,7 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
   };
 
   const getRegistrationBadge = (event) => {
+<<<<<<< HEAD
     // Only show for participants and volunteers
     if (userRole !== 'participant' && userRole !== 'volunteer') {
       return null;
@@ -139,6 +131,10 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
       return <Check size={12} color="#22c55e" />; // Checkmark for registered events
     }
     return null;
+=======
+    if (userRole !== 'participant' && userRole !== 'volunteer') return null;
+    return event.isUserRegistered;
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
   };
 
   const isToday = (fullDate) => {
@@ -159,8 +155,13 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
         </div>
         <div className="month-grid">
           {monthDays.map((day, idx) => (
+<<<<<<< HEAD
             <div
               key={idx}
+=======
+            <div 
+              key={idx} 
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
               className={`month-day-cell ${!day.isCurrentMonth ? 'other-month' : ''} ${isToday(day.fullDate) ? 'today' : ''}`}
             >
               <div className="month-day-number">{day.date}</div>
@@ -172,10 +173,13 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                     style={{ backgroundColor: getEventColor(event.type) }}
                     onClick={() => onEventClick(event)}
                   >
+<<<<<<< HEAD
                     <span className="month-event-indicator">{getCapacityIndicator(event)}</span>
                     {getRegistrationBadge(event) && (
                       <span className="registration-badge">{getRegistrationBadge(event)}</span>
                     )}
+=======
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
                     <span className="month-event-time">{event.time}</span>
                     <span className="month-event-title">{event.title}</span>
                   </div>
@@ -214,7 +218,6 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
             <div className="time-slot">{time}</div>
             {days.map((day, dayIdx) => {
               const dayEvents = getEventsForDate(day.fullDate);
-              // Show events that match this time slot or are close to it
               const eventsForSlot = dayEvents.filter(event => {
                 if (!event.fullDate) return false;
                 const eventDate = new Date(event.fullDate);
@@ -222,24 +225,31 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                 const slotHour = time === 'Noon' ? 12 : parseInt(time);
                 const isPM = time.includes('PM');
                 const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === 'Noon' ? 12 : slotHour);
-                // Show event if it's in this hour or within 1 hour range
-                return Math.abs(eventHour - actualHour) <= 1;
+                return Math.abs(eventHour - actualHour) <= 0;
               });
               
               return (
                 <div key={`${timeIdx}-${dayIdx}`} className="day-slot">
+<<<<<<< HEAD
                   {eventsForSlot.map(event => (
                     <div
+=======
+                  {eventsForSlot.map((event) => (
+                    <div 
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
                       key={event.id}
                       className={`event-card ${event.isUserRegistered ? 'user-registered' : ''}`}
                       style={{ backgroundColor: getEventColor(event.type) }}
                       onClick={() => onEventClick(event)}
                     >
                       <div className="event-header-row">
+<<<<<<< HEAD
                         <span className="event-indicator">{getCapacityIndicator(event)}</span>
                         {getRegistrationBadge(event) && (
                           <span className="registration-badge">{getRegistrationBadge(event)}</span>
                         )}
+=======
+>>>>>>> 93016508935a01060254fd368ab20b147bd16d14
                         <div className="event-time">{event.time}</div>
                       </div>
                       <div className="event-title">{event.title}</div>
