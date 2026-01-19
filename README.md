@@ -84,3 +84,6 @@ src/
 ├── locales/        # Translation files
 └── App.js          # Main application
 ```
+
+## References
+Link to backend repo: https://github.com/p1922389-JunWei/Lumen-BE
