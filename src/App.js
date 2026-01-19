@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import ChoiceGate from './components/pages/ChoiceGate';
 import LoginSuccess from './components/pages/LoginSuccess';
 import Schedule from './components/Schedule';
+import Profile from './components/Profile';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -65,6 +66,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <LoginSuccess />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         } 
       />

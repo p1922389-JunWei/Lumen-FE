@@ -32,13 +32,6 @@ const Login = () => {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
   return (
     <div className="login-container">
       <div className="login-card">
@@ -57,7 +50,6 @@ const Login = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Enter your email"
               autoComplete="email"
             />
@@ -70,7 +62,6 @@ const Login = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder="Enter your password"
               autoComplete="current-password"
             />

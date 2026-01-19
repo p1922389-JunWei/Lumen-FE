@@ -264,7 +264,7 @@ const ChoiceGate = () => {
               </div>
 
               {!otpSent ? (
-                <>
+                <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
                   <div style={styles.formGroup}>
                     <Input
                       label={t('login.fullNameLabel')}
@@ -301,17 +301,17 @@ const ChoiceGate = () => {
                   {error && <p style={styles.errorMessage}>{error}</p>}
 
                   <Button 
+                    type="submit"
                     variant="primary" 
                     size="lg" 
                     style={{ width: '100%' }}
-                    onClick={handleSendOtp}
                     disabled={phone.length < 8 || !fullName || !birthdate || loading}
                   >
                     {loading ? t('common.loading') : t('login.sendOtp')}
                   </Button>
-                </>
+                </form>
               ) : (
-                <>
+                <form onSubmit={(e) => { e.preventDefault(); handleSeniorLogin(); }}>
                   <p style={styles.successMessage}>
                     {isNewUser ? t('login.accountCreatedOtpSent') : t('login.otpSent')}
                   </p>
@@ -328,15 +328,15 @@ const ChoiceGate = () => {
                   </div>
                   {error && <p style={styles.errorMessage}>{error}</p>}
                   <Button 
+                    type="submit"
                     variant="primary" 
                     size="lg" 
                     style={{ width: '100%' }}
-                    onClick={handleSeniorLogin}
                     disabled={otp.length !== 6 || loading}
                   >
                     {loading ? t('common.loading') : t('login.verifyOtp')}
                   </Button>
-                </>
+                </form>
               )}
             </Card>
           )}
@@ -358,39 +358,41 @@ const ChoiceGate = () => {
                 </h2>
               </div>
 
-              <div style={styles.formGroup}>
-                <Input
-                  label={t('login.emailLabel')}
-                  placeholder={t('login.emailPlaceholder')}
-                  type="email"
-                  size="lg"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+              <form onSubmit={(e) => { e.preventDefault(); handleStaffLogin(); }}>
+                <div style={styles.formGroup}>
+                  <Input
+                    label={t('login.emailLabel')}
+                    placeholder={t('login.emailPlaceholder')}
+                    type="email"
+                    size="lg"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-              <div style={styles.formGroup}>
-                <Input
-                  label={t('login.passwordLabel')}
-                  placeholder={t('login.passwordPlaceholder')}
-                  type="password"
-                  size="lg"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+                <div style={styles.formGroup}>
+                  <Input
+                    label={t('login.passwordLabel')}
+                    placeholder={t('login.passwordPlaceholder')}
+                    type="password"
+                    size="lg"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
 
-              {error && <p style={styles.errorMessage}>{error}</p>}
+                {error && <p style={styles.errorMessage}>{error}</p>}
 
-              <Button 
-                variant="primary" 
-                size="lg" 
-                style={{ width: '100%', backgroundColor: '#22C55E' }}
-                onClick={handleStaffLogin}
-                disabled={!email || !password || loading}
-              >
-                {loading ? t('common.loading') : t('login.signIn')}
-              </Button>
+                <Button 
+                  type="submit"
+                  variant="primary" 
+                  size="lg" 
+                  style={{ width: '100%', backgroundColor: '#22C55E' }}
+                  disabled={!email || !password || loading}
+                >
+                  {loading ? t('common.loading') : t('login.signIn')}
+                </Button>
+              </form>
             </Card>
           )}
         </div>
