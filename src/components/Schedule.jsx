@@ -164,6 +164,8 @@ const Schedule = () => {
             registered_participants: event.registered_participants,
             registered_volunteers: event.registered_volunteers,
             isUserRegistered: registeredIds.includes(event.eventID),
+            start_time: event.start_time,
+            end_time: event.end_time,
             eventData: event // Keep original data for modal
           };
         });
@@ -220,7 +222,7 @@ const Schedule = () => {
           id: event.eventID,
           title: event.eventName,
           time: time,
-          duration: '1 hour',
+          duration: duration,
           type: eventType,
           day: dayLabels[eventDate.getDay()],
           date: eventDate.getDate(),
@@ -235,7 +237,10 @@ const Schedule = () => {
           registered_volunteers: event.registered_volunteers,
           participants: event.participants,
           volunteers: event.volunteers,
-          isUserRegistered: userRegisteredEvents.includes(event.eventID)
+          isUserRegistered: userRegisteredEvents.includes(event.eventID),
+          start_time: event.start_time,
+          end_time: event.end_time,
+          eventData: event
         };
       }
     } catch (error) {
@@ -380,8 +385,6 @@ const Schedule = () => {
                   + Create Event
                 </button>
               )}
-              <button className="search-btn">🔍</button>
-              <button className="settings-btn">⚙️</button>
             </div>
                       </div>
         </div>

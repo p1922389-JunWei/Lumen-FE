@@ -222,11 +222,11 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
                   <div className="activity-item-stats">
                     <div className="stat">
                       <Users size={12} />
-                      <span>{event.registered_participants || 0}/{event.max_participants || '∞'} participants</span>
+                      <span>{event.registered_participants}/{event.max_participants || '∞'} participants</span>
                     </div>
                     <div className="stat">
                       <Users size={12} />
-                      <span>{event.registered_volunteers || 0}/{event.max_volunteers || '∞'} volunteers</span>
+                      <span>{event.registered_volunteers}/{event.max_volunteers || '∞'} volunteers</span>
                     </div>
                   </div>
 

@@ -93,8 +93,8 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
   };
 
   const getCapacityIndicator = (event) => {
-    const participantsFull = (event.registered_participants || 0) >= (event.max_participants || 10);
-    const volunteersFull = (event.registered_volunteers || 0) >= (event.max_volunteers || 5);
+    const participantsFull = (event.registered_participants) >= (event.max_participants || 10);
+    const volunteersFull = (event.registered_volunteers) >= (event.max_volunteers || 5);
     
     if (participantsFull && volunteersFull) {
       return '🔴'; // Full
