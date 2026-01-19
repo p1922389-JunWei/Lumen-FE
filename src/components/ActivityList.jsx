@@ -24,7 +24,7 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
       if (data.success) {
         // Sort events by date
         const sortedEvents = data.data.sort((a, b) => 
-          new Date(a.datetime) - new Date(b.datetime)
+          new Date(a.start_time) - new Date(b.start_time)
         );
         setEvents(sortedEvents);
       }
@@ -70,9 +70,9 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
     // Time filter
     let matchesTimeFilter = true;
     if (filter === 'upcoming') {
-      matchesTimeFilter = isUpcoming(event.datetime);
+      matchesTimeFilter = isUpcoming(event.start_time);
     } else if (filter === 'past') {
-      matchesTimeFilter = !isUpcoming(event.datetime);
+      matchesTimeFilter = !isUpcoming(event.start_time);
     }
     
     return matchesSearch && matchesTimeFilter;
@@ -87,7 +87,7 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
       title: event.eventName,
       description: event.eventDescription,
       location: event.location,
-      fullDate: new Date(event.datetime),
+      fullDate: new Date(event.start_time),
       disabled_friendly: event.disabled_friendly,
       max_participants: event.max_participants,
       max_volunteers: event.max_volunteers,
@@ -99,7 +99,7 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
 
   const handleEventClick = (event) => {
     // Transform event for EventModal view
-    const eventDate = new Date(event.datetime);
+    const eventDate = new Date(event.start_time);
     const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const hours = eventDate.getHours();
     const minutes = eventDate.getMinutes();
@@ -190,7 +190,7 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
               {filteredEvents.map((event) => (
                 <div 
                   key={event.eventID} 
-                  className={`activity-item ${!isUpcoming(event.datetime) ? 'past' : ''}`}
+                  className={`activity-item ${!isUpcoming(event.start_time) ? 'past' : ''}`}
                   onClick={() => handleEventClick(event)}
                 >
                   <div className="activity-item-header">
@@ -207,11 +207,11 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
                   <div className="activity-item-details">
                     <div className="activity-detail">
                       <Calendar size={12} />
-                      <span>{formatDate(event.datetime)}</span>
+                      <span>{formatDate(event.start_time)}</span>
                     </div>
                     <div className="activity-detail">
                       <Clock size={12} />
-                      <span>{formatTime(event.datetime)}</span>
+                      <span>{formatTime(event.start_time)}</span>
                     </div>
                     <div className="activity-detail">
                       <MapPin size={12} />
@@ -230,7 +230,7 @@ const ActivityList = ({ onEditEvent, onEventClick }) => {
                     </div>
                   </div>
 
-                  {!isUpcoming(event.datetime) && (
+                  {!isUpcoming(event.start_time) && (
                     <div className="past-badge">Past Event</div>
                   )}
                 </div>

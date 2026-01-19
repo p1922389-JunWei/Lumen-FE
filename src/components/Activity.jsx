@@ -53,7 +53,7 @@ const Activity = () => {
       if (data.success) {
         // Sort events by date
         const sortedEvents = data.data.sort((a, b) => 
-          new Date(a.datetime) - new Date(b.datetime)
+          new Date(a.start_time) - new Date(b.start_time)
         );
         
         // Add isUserRegistered flag
@@ -91,7 +91,8 @@ const Activity = () => {
       
       if (data.success) {
         const event = data.data;
-        const eventDate = new Date(event.datetime);
+        const eventDate = new Date(event.start_time);
+        const endDate = event.end_time ? new Date(event.end_time) : null;
         const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
         
         const hours = eventDate.getHours();
@@ -99,12 +100,26 @@ const Activity = () => {
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const displayHours = hours % 12 || 12;
         const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
+        // Calculate duration if end_time exists
+        let duration = '1 hour';
+        if (endDate) {
+          const diffMs = endDate - eventDate;
+          const diffMins = Math.round(diffMs / 60000);
+          if (diffMins < 60) {
+            duration = `${diffMins} min`;
+          } else {
+            const diffHours = Math.floor(diffMins / 60);
+            const remainingMins = diffMins % 60;
+            duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+          }
+        }
 
         return {
           id: event.eventID,
           title: event.eventName,
           time: time,
-          duration: '1 hour',
+          duration: duration,
           type: 'Event',
           day: dayLabels[eventDate.getDay()],
           date: eventDate.getDate(),
@@ -245,9 +260,9 @@ const Activity = () => {
     
     let matchesTimeFilter = true;
     if (filter === 'upcoming') {
-      matchesTimeFilter = isUpcoming(event.datetime);
+      matchesTimeFilter = isUpcoming(event.start_time);
     } else if (filter === 'past') {
-      matchesTimeFilter = !isUpcoming(event.datetime);
+      matchesTimeFilter = !isUpcoming(event.start_time);
     }
     
     return matchesSearch && matchesTimeFilter;
@@ -266,7 +281,7 @@ const Activity = () => {
       title: event.eventName,
       description: event.eventDescription,
       location: event.location,
-      fullDate: new Date(event.datetime),
+      fullDate: new Date(event.start_time),
       disabled_friendly: event.disabled_friendly,
       max_participants: event.max_participants,
       max_volunteers: event.max_volunteers,
@@ -344,13 +359,13 @@ const Activity = () => {
               {filteredEvents.map((event) => (
                 <div 
                   key={event.eventID} 
-                  className={`activity-card ${!isUpcoming(event.datetime) ? 'past' : ''} ${event.isUserRegistered ? 'registered' : ''}`}
+                  className={`activity-card ${!isUpcoming(event.start_time) ? 'past' : ''} ${event.isUserRegistered ? 'registered' : ''}`}
                   onClick={() => handleEventClick(event)}
                 >
                   {event.isUserRegistered && (
                     <div className="registered-badge">Registered</div>
                   )}
-                  {!isUpcoming(event.datetime) && (
+                  {!isUpcoming(event.start_time) && (
                     <div className="past-badge">Past Event</div>
                   )}
                   
@@ -370,11 +385,11 @@ const Activity = () => {
                   <div className="card-details">
                     <div className="card-detail">
                       <Calendar size={16} />
-                      <span>{formatDate(event.datetime)}</span>
+                      <span>{formatDate(event.start_time)}</span>
                     </div>
                     <div className="card-detail">
                       <Clock size={16} />
-                      <span>{formatTime(event.datetime)}</span>
+                      <span>{formatTime(event.start_time)}</span>
                     </div>
                     <div className="card-detail">
                       <MapPin size={16} />

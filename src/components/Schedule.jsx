@@ -113,7 +113,8 @@ const Schedule = () => {
       if (data.success) {
         // Transform API events to calendar format
         const transformedEvents = data.data.map(event => {
-          const eventDate = new Date(event.datetime);
+          const eventDate = new Date(event.start_time);
+          const endDate = event.end_time ? new Date(event.end_time) : null;
           const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
           // Format time (e.g., "9:00 AM")
           const hours = eventDate.getHours();
@@ -121,6 +122,21 @@ const Schedule = () => {
           const ampm = hours >= 12 ? 'PM' : 'AM';
           const displayHours = hours % 12 || 12;
           const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+          
+          // Calculate duration if end_time exists
+          let duration = '1 hour';
+          if (endDate) {
+            const diffMs = endDate - eventDate;
+            const diffMins = Math.round(diffMs / 60000);
+            if (diffMins < 60) {
+              duration = `${diffMins} min`;
+            } else {
+              const diffHours = Math.floor(diffMins / 60);
+              const remainingMins = diffMins % 60;
+              duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+            }
+          }
+          
           // Determine event type based on location or description
           let eventType = 'Event';
           if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {
@@ -134,7 +150,7 @@ const Schedule = () => {
             id: event.eventID,
             title: event.eventName,
             time: time,
-            duration: '1 hour', // Default duration, could be calculated if stored
+            duration: duration,
             type: eventType,
             day: dayLabels[eventDate.getDay()],
             date: eventDate.getDate(),
@@ -167,7 +183,8 @@ const Schedule = () => {
       
       if (data.success) {
         const event = data.data;
-        const eventDate = new Date(event.datetime);
+        const eventDate = new Date(event.start_time);
+        const endDate = event.end_time ? new Date(event.end_time) : null;
         const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
         
         const hours = eventDate.getHours();
@@ -175,6 +192,20 @@ const Schedule = () => {
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const displayHours = hours % 12 || 12;
         const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
+        // Calculate duration if end_time exists
+        let duration = '1 hour';
+        if (endDate) {
+          const diffMs = endDate - eventDate;
+          const diffMins = Math.round(diffMs / 60000);
+          if (diffMins < 60) {
+            duration = `${diffMins} min`;
+          } else {
+            const diffHours = Math.floor(diffMins / 60);
+            const remainingMins = diffMins % 60;
+            duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+          }
+        }
         
         let eventType = 'Event';
         if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {

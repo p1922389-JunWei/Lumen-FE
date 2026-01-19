@@ -9,7 +9,8 @@ const CreateEventModal = ({ onClose, onSuccess }) => {
     eventName: '',
     eventDescription: '',
     disabled_friendly: false,
-    datetime: '',
+    start_time: '',
+    end_time: '',
     location: '',
     additional_information: '',
     max_participants: '',
@@ -42,8 +43,14 @@ const CreateEventModal = ({ onClose, onSuccess }) => {
       return;
     }
 
-    if (!formData.datetime) {
-      setError('Date and time are required');
+    if (!formData.start_time) {
+      setError('Start time is required');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.end_time) {
+      setError('End time is required');
       setLoading(false);
       return;
     }
@@ -65,7 +72,8 @@ const CreateEventModal = ({ onClose, onSuccess }) => {
           eventName: formData.eventName,
           eventDescription: formData.eventDescription,
           disabled_friendly: formData.disabled_friendly,
-          datetime: formData.datetime.replace('T', ' '),
+          start_time: formData.start_time.replace('T', ' '),
+          end_time: formData.end_time.replace('T', ' '),
           location: formData.location,
           additional_information: formData.additional_information,
           max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -144,12 +152,24 @@ const CreateEventModal = ({ onClose, onSuccess }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="datetime">Date & Time *</label>
+              <label htmlFor="start_time">Start Time *</label>
               <input
                 type="datetime-local"
-                id="datetime"
-                name="datetime"
-                value={formData.datetime}
+                id="start_time"
+                name="start_time"
+                value={formData.start_time}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="end_time">End Time *</label>
+              <input
+                type="datetime-local"
+                id="end_time"
+                name="end_time"
+                value={formData.end_time}
                 onChange={handleChange}
                 required
               />

@@ -9,7 +9,8 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
     eventName: '',
     eventDescription: '',
     disabled_friendly: false,
-    datetime: '',
+    start_time: '',
+    end_time: '',
     location: '',
     additional_information: '',
     max_participants: '',
@@ -20,21 +21,29 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
   // Initialize form data with event details
   useEffect(() => {
     if (event) {
-      // Format datetime for input
-      let formattedDatetime = '';
-      if (event.fullDate) {
+      // Format start_time for input
+      let formattedStartTime = '';
+      let formattedEndTime = '';
+      
+      if (event.eventData?.start_time) {
+        const dt = new Date(event.eventData.start_time);
+        formattedStartTime = dt.toISOString().slice(0, 16);
+      } else if (event.fullDate) {
         const dt = new Date(event.fullDate);
-        formattedDatetime = dt.toISOString().slice(0, 16);
-      } else if (event.eventData?.datetime) {
-        const dt = new Date(event.eventData.datetime);
-        formattedDatetime = dt.toISOString().slice(0, 16);
+        formattedStartTime = dt.toISOString().slice(0, 16);
+      }
+      
+      if (event.eventData?.end_time) {
+        const dt = new Date(event.eventData.end_time);
+        formattedEndTime = dt.toISOString().slice(0, 16);
       }
 
       setFormData({
         eventName: event.title || event.eventData?.eventName || '',
         eventDescription: event.description || event.eventData?.eventDescription || '',
         disabled_friendly: event.disabled_friendly || event.eventData?.disabled_friendly || false,
-        datetime: formattedDatetime,
+        start_time: formattedStartTime,
+        end_time: formattedEndTime,
         location: event.location || event.eventData?.location || '',
         additional_information: event.notes || event.eventData?.additional_information || '',
         max_participants: event.max_participants || event.eventData?.max_participants || '',
@@ -68,8 +77,14 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
       return;
     }
 
-    if (!formData.datetime) {
-      setError('Date and time are required');
+    if (!formData.start_time) {
+      setError('Start time is required');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.end_time) {
+      setError('End time is required');
       setLoading(false);
       return;
     }
@@ -92,7 +107,8 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
           eventName: formData.eventName,
           eventDescription: formData.eventDescription,
           disabled_friendly: formData.disabled_friendly,
-          datetime: formData.datetime.replace('T', ' '),
+          start_time: formData.start_time.replace('T', ' '),
+          end_time: formData.end_time.replace('T', ' '),
           location: formData.location,
           additional_information: formData.additional_information,
           max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -202,12 +218,24 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="datetime">Date & Time *</label>
+              <label htmlFor="start_time">Start Time *</label>
               <input
                 type="datetime-local"
-                id="datetime"
-                name="datetime"
-                value={formData.datetime}
+                id="start_time"
+                name="start_time"
+                value={formData.start_time}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="end_time">End Time *</label>
+              <input
+                type="datetime-local"
+                id="end_time"
+                name="end_time"
+                value={formData.end_time}
                 onChange={handleChange}
                 required
               />
