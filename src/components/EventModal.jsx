@@ -214,7 +214,7 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onManageEvent }) 
           )}
 
           {/* Disabled Friendly Badge */}
-          {event.disabled_friendly && (
+          {event.disabled_friendly === 1 && (
             <div className="section">
               <div className="badge" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}>
                 <Accessibility size={16} />
