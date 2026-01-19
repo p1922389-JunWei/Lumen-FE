@@ -116,12 +116,21 @@ const Schedule = () => {
           const eventDate = new Date(event.start_time);
           const endDate = event.end_time ? new Date(event.end_time) : null;
           const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-          // Format time (e.g., "9:00 AM")
+          // Format time (e.g., "9:00 AM - 10:00 AM")
           const hours = eventDate.getHours();
           const minutes = eventDate.getMinutes();
           const ampm = hours >= 12 ? 'PM' : 'AM';
           const displayHours = hours % 12 || 12;
-          const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+          let time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+          
+          // Add end time if available
+          if (endDate) {
+            const endHours = endDate.getHours();
+            const endMinutes = endDate.getMinutes();
+            const endAmpm = endHours >= 12 ? 'PM' : 'AM';
+            const endDisplayHours = endHours % 12 || 12;
+            time += ` - ${endDisplayHours}:${endMinutes.toString().padStart(2, '0')} ${endAmpm}`;
+          }
           
           // Calculate duration if end_time exists
           let duration = '1 hour';
@@ -193,7 +202,16 @@ const Schedule = () => {
         const minutes = eventDate.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const displayHours = hours % 12 || 12;
-        const time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        let time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
+        // Add end time if available
+        if (endDate) {
+          const endHours = endDate.getHours();
+          const endMinutes = endDate.getMinutes();
+          const endAmpm = endHours >= 12 ? 'PM' : 'AM';
+          const endDisplayHours = endHours % 12 || 12;
+          time += ` - ${endDisplayHours}:${endMinutes.toString().padStart(2, '0')} ${endAmpm}`;
+        }
         
         // Calculate duration if end_time exists
         let duration = '1 hour';
