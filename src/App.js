@@ -7,6 +7,7 @@ import LoginSuccess from './components/pages/LoginSuccess';
 import Schedule from './components/Schedule';
 import Profile from './components/Profile';
 import AdminUsers from './components/AdminUsers';
+import Dashboard from './components/Dashboard';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -75,6 +76,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
           </ProtectedRoute>
         } 
       />
