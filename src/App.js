@@ -6,6 +6,7 @@ import ChoiceGate from './components/pages/ChoiceGate';
 import LoginSuccess from './components/pages/LoginSuccess';
 import Schedule from './components/Schedule';
 import Profile from './components/Profile';
+import AdminUsers from './components/AdminUsers';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -65,7 +66,7 @@ function AppRoutes() {
         path="/admin" 
         element={
           <ProtectedRoute>
-            <LoginSuccess />
+            <AdminUsers />
           </ProtectedRoute>
         } 
       />

@@ -4,12 +4,33 @@ import ScheduleSidebar from './ScheduleSidebar';
 import { User, Mail, Phone, Calendar, Shield, Save, X } from 'lucide-react';
 import './Profile.css';
 
+// Helper to format date as YYYY-MM-DD without timezone shift (for input)
+const formatDateForInput = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper to format date as DD-MM-YYYY for display
+const formatDateForDisplay = (dateString) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${day}-${month}-${year}`;
+};
+
 const Profile = () => {
-  const { user, getToken } = useAuth();
+  const { user, getToken, updateUser } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
+  const [editedBirthdate, setEditedBirthdate] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -24,7 +45,7 @@ const Profile = () => {
       return;
     }
     
-    try {
+      try {
       const response = await fetch('http://localhost:3001/api/me', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -35,6 +56,7 @@ const Profile = () => {
       if (data.success) {
         setProfileData(data.data);
         setEditedName(data.data.fullName || '');
+        setEditedBirthdate(formatDateForInput(data.data.birthdate));
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -56,6 +78,7 @@ const Profile = () => {
         },
         body: JSON.stringify({
           fullName: editedName,
+          birthdate: editedBirthdate || undefined,
           role: profileData.role,
           image_url: profileData.image_url
         })
@@ -64,7 +87,8 @@ const Profile = () => {
       const data = await response.json();
       
       if (data.success) {
-        setProfileData({ ...profileData, fullName: editedName });
+        setProfileData({ ...profileData, fullName: editedName, birthdate: editedBirthdate });
+        updateUser({ fullName: editedName });
         setEditing(false);
         setMessage({ type: 'success', text: 'Profile updated successfully!' });
       } else {
@@ -79,6 +103,7 @@ const Profile = () => {
 
   const handleCancel = () => {
     setEditedName(profileData?.fullName || '');
+    setEditedBirthdate(formatDateForInput(profileData?.birthdate));
     setEditing(false);
   };
 
@@ -140,22 +165,41 @@ const Profile = () => {
               </div>
             </div>
 
-            {user?.email && (
+            {profileData?.email && (
               <div className="profile-detail-item">
                 <Mail size={20} className="detail-icon" />
                 <div className="detail-content">
                   <label>Email</label>
-                  <span>{user.email}</span>
+                  <span>{profileData.email}</span>
                 </div>
               </div>
             )}
 
-            {user?.phoneNumber && (
+            {profileData?.phoneNumber && (
               <div className="profile-detail-item">
                 <Phone size={20} className="detail-icon" />
                 <div className="detail-content">
                   <label>Phone Number</label>
-                  <span>{user.phoneNumber}</span>
+                  <span>{profileData.phoneNumber}</span>
+                </div>
+              </div>
+            )}
+
+            {profileData?.role === 'participant' && (
+              <div className="profile-detail-item">
+                <Calendar size={20} className="detail-icon" />
+                <div className="detail-content">
+                  <label>Birthdate</label>
+                  {editing ? (
+                    <input
+                      type="date"
+                      className="profile-date-input"
+                      value={editedBirthdate}
+                      onChange={(e) => setEditedBirthdate(e.target.value)}
+                    />
+                  ) : (
+                    <span>{formatDateForDisplay(profileData?.birthdate)}</span>
+                  )}
                 </div>
               </div>
             )}
