@@ -68,6 +68,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
+  const updateUser = (updatedData) => {
+    const newUser = { ...user, ...updatedData };
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
+  };
+
   const loginWithEmail = async (email, password) => {
     return await login(email, password);
   };
@@ -125,7 +131,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginWithEmail, checkOrCreateParticipant, loginWithOtp, loading, getToken, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loginWithEmail, checkOrCreateParticipant, loginWithOtp, loading, getToken, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
