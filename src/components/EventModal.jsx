@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Accessibility, Users, CheckCircle, MapPin } from 'lucide-react';
+import { Accessibility, Users, CheckCircle, MapPin, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './EventModal.css';
 
@@ -80,8 +80,8 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
   const getOptimisticCapacity = () => {
     if (optimisticRegistered === null) {
       return {
-        participants: event.registered_participants || 0,
-        volunteers: event.registered_volunteers || 0
+        participants: event.registered_participants,
+        volunteers: event.registered_volunteers
       };
     }
     
@@ -89,19 +89,19 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
     
     if (user?.role === 'participant') {
       return {
-        participants: (event.registered_participants || 0) + delta,
-        volunteers: event.registered_volunteers || 0
+        participants: (event.registered_participants) + delta,
+        volunteers: event.registered_volunteers
       };
     } else if (user?.role === 'volunteer') {
       return {
-        participants: event.registered_participants || 0,
-        volunteers: (event.registered_volunteers || 0) + delta
+        participants: event.registered_participants,
+        volunteers: (event.registered_volunteers) + delta
       };
     }
     
     return {
-      participants: event.registered_participants || 0,
-      volunteers: event.registered_volunteers || 0
+      participants: event.registered_participants,
+      volunteers: event.registered_volunteers
     };
   };
 
@@ -121,6 +121,22 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
               <span className="time">{event.time}</span>
               <span className="duration">{event.duration}</span>
             </div>
+            {(event.start_time || event.eventData?.start_time || event.end_time || event.eventData?.end_time) && (
+              <div className="time-range" style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                {(event.start_time || event.eventData?.start_time) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={14} />
+                    <span>Start: {new Date(event.start_time || event.eventData?.start_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                  </div>
+                )}
+                {(event.end_time || event.eventData?.end_time) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={14} />
+                    <span>End: {new Date(event.end_time || event.eventData?.end_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {event.location && (
@@ -214,7 +230,7 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
           )}
 
           {/* Disabled Friendly Badge */}
-          {event.disabled_friendly && (
+          {(event.disabled_friendly === 1 || event.disabled_friendly === true) && (
             <div className="section">
               <div className="badge" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}>
                 <Accessibility size={16} />

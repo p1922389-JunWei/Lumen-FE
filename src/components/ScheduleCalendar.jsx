@@ -105,8 +105,8 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
   };
 
   const getCapacityIndicator = (event) => {
-    const participantsFull = (event.registered_participants || 0) >= (event.max_participants || 10);
-    const volunteersFull = (event.registered_volunteers || 0) >= (event.max_volunteers || 5);
+    const participantsFull = (event.registered_participants) >= (event.max_participants || 10);
+    const volunteersFull = (event.registered_volunteers) >= (event.max_volunteers || 5);
     
     if (participantsFull && volunteersFull) {
       return '🔴'; // Full
@@ -194,9 +194,9 @@ const ScheduleCalendar = ({ events, onEventClick, viewType = 'week', currentDate
                 if (!event.fullDate) return false;
                 const eventDate = new Date(event.fullDate);
                 const eventHour = eventDate.getHours();
-                const slotHour = time === 'Noon' ? 12 : parseInt(time);
+                const slotHour = time === '12 PM' ? 12 : parseInt(time);
                 const isPM = time.includes('PM');
-                const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === 'Noon' ? 12 : slotHour);
+                const actualHour = isPM && slotHour !== 12 ? slotHour + 12 : (time === '12 PM' ? 12 : slotHour);
                 return Math.abs(eventHour - actualHour) <= 0;
               });
               

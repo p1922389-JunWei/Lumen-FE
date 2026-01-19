@@ -407,11 +407,11 @@ const Activity = () => {
                     <div className="card-stats">
                       <div className="stat-item">
                         <Users size={14} />
-                        <span>{event.registered_participants || 0}/{event.max_participants || '∞'}</span>
+                        <span>{event.registered_participants}/{event.max_participants || '∞'}</span>
                       </div>
                       <div className="stat-item">
                         <Users size={14} />
-                        <span>{event.registered_volunteers || 0}/{event.max_volunteers || '∞'} vol</span>
+                        <span>{event.registered_volunteers}/{event.max_volunteers || '∞'} vol</span>
                       </div>
                     </div>
                     {event.disabled_friendly === 1 || event.disabled_friendly === true ? (
