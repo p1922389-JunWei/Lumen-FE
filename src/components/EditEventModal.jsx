@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { formatToDateTimeLocal } from '../lib/timezone';
 import './EditEventModal.css';
 
 const EditEventModal = ({ event, onClose, onSuccess }) => {
@@ -21,21 +22,18 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
   // Initialize form data with event details
   useEffect(() => {
     if (event) {
-      // Format start_time for input
+      // Format start_time for input using timezone utility
       let formattedStartTime = '';
       let formattedEndTime = '';
       
       if (event.eventData?.start_time) {
-        const dt = new Date(event.eventData.start_time);
-        formattedStartTime = dt.toISOString().slice(0, 16);
+        formattedStartTime = formatToDateTimeLocal(event.eventData.start_time);
       } else if (event.fullDate) {
-        const dt = new Date(event.fullDate);
-        formattedStartTime = dt.toISOString().slice(0, 16);
+        formattedStartTime = formatToDateTimeLocal(event.fullDate);
       }
       
       if (event.eventData?.end_time) {
-        const dt = new Date(event.eventData.end_time);
-        formattedEndTime = dt.toISOString().slice(0, 16);
+        formattedEndTime = formatToDateTimeLocal(event.eventData.end_time);
       }
 
       setFormData({

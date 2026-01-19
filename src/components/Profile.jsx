@@ -4,24 +4,38 @@ import ScheduleSidebar from './ScheduleSidebar';
 import { User, Mail, Phone, Calendar, Shield, Save, X } from 'lucide-react';
 import './Profile.css';
 
+// Timezone constant for Singapore (GMT+8)
+const TIMEZONE = 'Asia/Singapore';
+
 // Helper to format date as YYYY-MM-DD without timezone shift (for input)
 const formatDateForInput = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  // Format in Singapore timezone
+  const options = {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  };
+  const parts = new Intl.DateTimeFormat('en-CA', options).formatToParts(date);
+  const values = {};
+  parts.forEach(part => {
+    values[part.type] = part.value;
+  });
+  return `${values.year}-${values.month}-${values.day}`;
 };
 
 // Helper to format date as DD-MM-YYYY for display
 const formatDateForDisplay = (dateString) => {
   if (!dateString) return '-';
   const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${day}-${month}-${year}`;
+  return date.toLocaleDateString('en-GB', {
+    timeZone: TIMEZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
 };
 
 const Profile = () => {

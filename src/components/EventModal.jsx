@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Accessibility, Users, CheckCircle, MapPin, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { formatDateTime } from '../lib/timezone';
 import './EventModal.css';
 
 const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
@@ -14,8 +15,12 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
     if (!event) return false;
     
     if (user?.role === 'participant') {
+      // If max_participants is null/undefined, event has unlimited capacity
+      if (!event.max_participants || event.max_participants === null) return false;
       return event.registered_participants >= event.max_participants;
     } else if (user?.role === 'volunteer') {
+      // If max_volunteers is null/undefined, event has unlimited capacity
+      if (!event.max_volunteers || event.max_volunteers === null) return false;
       return event.registered_volunteers >= event.max_volunteers;
     }
     return false;
@@ -126,13 +131,13 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
                 {(event.start_time || event.eventData?.start_time) && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Clock size={14} />
-                    <span>Start: {new Date(event.start_time || event.eventData?.start_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    <span>Start: {formatDateTime(event.start_time || event.eventData?.start_time)}</span>
                   </div>
                 )}
                 {(event.end_time || event.eventData?.end_time) && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Clock size={14} />
-                    <span>End: {new Date(event.end_time || event.eventData?.end_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    <span>End: {formatDateTime(event.end_time || event.eventData?.end_time)}</span>
                   </div>
                 )}
               </div>

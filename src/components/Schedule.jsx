@@ -7,7 +7,9 @@ import DatePickerModal from './DatePickerModal';
 import CreateEventModal from './CreateEventModal';
 import EditEventModal from './EditEventModal';
 import Toast from './Toast';
+import DailyReminder, { ReminderButton } from './DailyReminder';
 import { useAuth } from '../context/AuthContext';
+import { formatTimeRange, calculateDuration } from '../lib/timezone';
 
 const Schedule = () => {
   const { user, getToken } = useAuth();
@@ -21,6 +23,24 @@ const Schedule = () => {
   const [toast, setToast] = useState(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [showDailyReminder, setShowDailyReminder] = useState(false);
+
+  // Check if daily reminder should be shown on login
+  useEffect(() => {
+    if (user && (user.role === 'participant' || user.role === 'volunteer')) {
+      const today = new Date().toDateString();
+      const lastShown = localStorage.getItem(`dailyReminder_${user.userID}`);
+      
+      if (lastShown !== today) {
+        // Show reminder after a short delay for better UX
+        const timer = setTimeout(() => {
+          setShowDailyReminder(true);
+          localStorage.setItem(`dailyReminder_${user.userID}`, today);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user]);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -116,35 +136,12 @@ const Schedule = () => {
           const eventDate = new Date(event.start_time);
           const endDate = event.end_time ? new Date(event.end_time) : null;
           const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-          // Format time (e.g., "9:00 AM - 10:00 AM")
-          const hours = eventDate.getHours();
-          const minutes = eventDate.getMinutes();
-          const ampm = hours >= 12 ? 'PM' : 'AM';
-          const displayHours = hours % 12 || 12;
-          let time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
           
-          // Add end time if available
-          if (endDate) {
-            const endHours = endDate.getHours();
-            const endMinutes = endDate.getMinutes();
-            const endAmpm = endHours >= 12 ? 'PM' : 'AM';
-            const endDisplayHours = endHours % 12 || 12;
-            time += ` - ${endDisplayHours}:${endMinutes.toString().padStart(2, '0')} ${endAmpm}`;
-          }
+          // Format time using timezone utility (e.g., "9:00 AM - 10:00 AM")
+          const time = formatTimeRange(event.start_time, event.end_time);
           
-          // Calculate duration if end_time exists
-          let duration = '1 hour';
-          if (endDate) {
-            const diffMs = endDate - eventDate;
-            const diffMins = Math.round(diffMs / 60000);
-            if (diffMins < 60) {
-              duration = `${diffMins} min`;
-            } else {
-              const diffHours = Math.floor(diffMins / 60);
-              const remainingMins = diffMins % 60;
-              duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
-            }
-          }
+          // Calculate duration using timezone utility
+          const duration = calculateDuration(event.start_time, event.end_time) || '1 hour';
           
           // Determine event type based on location or description
           let eventType = 'Event';
@@ -198,34 +195,11 @@ const Schedule = () => {
         const endDate = event.end_time ? new Date(event.end_time) : null;
         const dayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
         
-        const hours = eventDate.getHours();
-        const minutes = eventDate.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const displayHours = hours % 12 || 12;
-        let time = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        // Format time using timezone utility
+        const time = formatTimeRange(event.start_time, event.end_time);
         
-        // Add end time if available
-        if (endDate) {
-          const endHours = endDate.getHours();
-          const endMinutes = endDate.getMinutes();
-          const endAmpm = endHours >= 12 ? 'PM' : 'AM';
-          const endDisplayHours = endHours % 12 || 12;
-          time += ` - ${endDisplayHours}:${endMinutes.toString().padStart(2, '0')} ${endAmpm}`;
-        }
-        
-        // Calculate duration if end_time exists
-        let duration = '1 hour';
-        if (endDate) {
-          const diffMs = endDate - eventDate;
-          const diffMins = Math.round(diffMs / 60000);
-          if (diffMins < 60) {
-            duration = `${diffMins} min`;
-          } else {
-            const diffHours = Math.floor(diffMins / 60);
-            const remainingMins = diffMins % 60;
-            duration = remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
-          }
-        }
+        // Calculate duration using timezone utility
+        const duration = calculateDuration(event.start_time, event.end_time) || '1 hour';
         
         let eventType = 'Event';
         if (event.location.toLowerCase().includes('home') || event.location.toLowerCase().includes('visit')) {
@@ -467,6 +441,23 @@ const Schedule = () => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
+        />
+      )}
+      {/* Daily Reminder Popup */}
+      {showDailyReminder && (
+        <DailyReminder
+          onClose={() => setShowDailyReminder(false)}
+          onEventClick={(event) => {
+            setShowDailyReminder(false);
+            handleEventClick(event);
+          }}
+        />
+      )}
+      {/* Floating Reminder Button - only for participants and volunteers */}
+      {user && (user.role === 'participant' || user.role === 'volunteer') && (
+        <ReminderButton
+          onClick={() => setShowDailyReminder(true)}
+          hasUpcoming={userRegisteredEvents.length > 0}
         />
       )}
     </div>
