@@ -4,6 +4,7 @@ import ScheduleSidebar from './ScheduleSidebar';
 import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
+import CreateEventModal from './CreateEventModal';
 import Toast from './Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,6 +18,7 @@ const Schedule = () => {
   const [loading, setLoading] = useState(true);
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
   const [toast, setToast] = useState(null);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -336,6 +338,15 @@ const Schedule = () => {
               <button className="today-btn" onClick={goToToday}>Today</button>
             </div>
             <div className="header-actions">
+              {user?.role === 'staff' && (
+                <button 
+                  className="btn btn-create-event"
+                  onClick={() => setShowCreateEvent(true)}
+                  style={{ backgroundColor: '#4caf50', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}
+                >
+                  + Create Event
+                </button>
+              )}
               <button className="search-btn">🔍</button>
               <button className="settings-btn">⚙️</button>
             </div>
@@ -372,6 +383,15 @@ const Schedule = () => {
             setShowDatePicker(false);
           }}
           onClose={() => setShowDatePicker(false)}
+        />
+      )}
+      {showCreateEvent && (
+        <CreateEventModal 
+          onClose={() => setShowCreateEvent(false)}
+          onSuccess={() => {
+            setToast({ message: 'Event created successfully!', type: 'success' });
+            fetchEvents();
+          }}
         />
       )}
       {toast && (

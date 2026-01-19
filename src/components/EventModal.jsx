@@ -147,11 +147,11 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
               <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
                 <div className="capacity-item">
                   <Users size={18} />
-                  <span>Participants: <strong className="capacity-number">{optimisticCapacity.participants}</strong>/{event.max_participants || 0}</span>
+                  <span>Participants: <strong className="capacity-number">{optimisticCapacity.participants}</strong>/{event.max_participants ? event.max_participants : '∞'}</span>
                 </div>
                 <div className="capacity-item">
                   <Users size={18} />
-                  <span>Volunteers: <strong className="capacity-number">{optimisticCapacity.volunteers}</strong>/{event.max_volunteers || 0}</span>
+                  <span>Volunteers: <strong className="capacity-number">{optimisticCapacity.volunteers}</strong>/{event.max_volunteers ? event.max_volunteers : '∞'}</span>
                 </div>
               </div>
             </div>
@@ -202,11 +202,11 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
                 <Users size={18} />
                 {user.role === 'participant' ? (
                   <span>
-                    <strong className="capacity-number">{optimisticCapacity.participants}</strong>/{event.max_participants || 0} participants registered
+                    <strong className="capacity-number">{optimisticCapacity.participants}</strong>/{event.max_participants ? event.max_participants : '∞'} participants registered
                   </span>
                 ) : (
                   <span>
-                    <strong className="capacity-number">{optimisticCapacity.volunteers}</strong>/{event.max_volunteers || 0} volunteers registered
+                    <strong className="capacity-number">{optimisticCapacity.volunteers}</strong>/{event.max_volunteers ? event.max_volunteers : '∞'} volunteers registered
                   </span>
                 )}
               </div>
@@ -236,7 +236,6 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
           {user?.role === 'staff' ? (
             <>
               <button className="btn btn-cancel" onClick={onClose}>Close</button>
-              <button className="btn btn-reschedule">Reschedule</button>
               <button className="btn btn-start">Manage Event</button>
             </>
           ) : (user?.role === 'participant' || user?.role === 'volunteer') ? (
