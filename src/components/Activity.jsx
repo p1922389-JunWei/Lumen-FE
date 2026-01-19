@@ -248,6 +248,13 @@ const Activity = () => {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
+  const formatTimeRange = (startTime, endTime) => {
+    const startFormatted = formatTime(startTime);
+    if (!endTime) return startFormatted;
+    const endFormatted = formatTime(endTime);
+    return `${startFormatted} - ${endFormatted}`;
+  };
+
   const isUpcoming = (dateString) => {
     return new Date(dateString) >= new Date();
   };
@@ -389,7 +396,7 @@ const Activity = () => {
                     </div>
                     <div className="card-detail">
                       <Clock size={16} />
-                      <span>{formatTime(event.start_time)}</span>
+                      <span>{formatTimeRange(event.start_time, event.end_time)}</span>
                     </div>
                     <div className="card-detail">
                       <MapPin size={16} />
