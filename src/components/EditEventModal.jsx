@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import './CreateEventModal.css';
+import './EditEventModal.css';
 
 const EditEventModal = ({ event, onClose, onSuccess }) => {
   const { user } = useAuth();
