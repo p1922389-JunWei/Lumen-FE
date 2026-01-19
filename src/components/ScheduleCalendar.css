@@ -100,10 +100,10 @@
   cursor: pointer;
   margin-bottom: 6px;
   border-left: 4px solid #4A90E2;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  backdrop-filter: blur(8px);
+  will-change: box-shadow;
 }
 
 .event-card.user-registered {
@@ -127,7 +127,6 @@
 
 .event-card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  transform: translateY(-3px) scale(1.01);
 }
 
 .event-header-row {
