@@ -20,7 +20,7 @@ const Schedule = () => {
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
   const [toast, setToast] = useState(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
-  const [showEditEvent, setShowEditEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -309,10 +309,6 @@ const Schedule = () => {
     }
   };
 
-  const handleManageEvent = (eventId) => {
-    setShowEditEvent(true);
-  };
-
   return (
     <div className="schedule-container">
       <ScheduleSidebar />
@@ -379,7 +375,10 @@ const Schedule = () => {
           onClose={() => setSelectedEvent(null)}
           onReserve={handleReserve}
           onUnregister={handleUnregister}
-          onManageEvent={handleManageEvent}
+          onEdit={(event) => {
+            setSelectedEvent(null);
+            setEditingEvent(event);
+          }}
         />
       )}
       {showDatePicker && (
@@ -392,23 +391,21 @@ const Schedule = () => {
           onClose={() => setShowDatePicker(false)}
         />
       )}
-      {showEditEvent && selectedEvent && (
-        <EditEventModal 
-          event={selectedEvent} 
-          onClose={() => setShowEditEvent(false)}
-          onSuccess={() => {
-            setToast({ message: 'Event updated successfully!', type: 'success' });
-            setShowEditEvent(false);
-            setSelectedEvent(null);
-            fetchEvents();
-          }}
-        />
-      )}
       {showCreateEvent && (
         <CreateEventModal 
           onClose={() => setShowCreateEvent(false)}
           onSuccess={() => {
             setToast({ message: 'Event created successfully!', type: 'success' });
+            fetchEvents();
+          }}
+        />
+      )}
+      {editingEvent && (
+        <EditEventModal 
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSuccess={() => {
+            setToast({ message: 'Event updated successfully!', type: 'success' });
             fetchEvents();
           }}
         />

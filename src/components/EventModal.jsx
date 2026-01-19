@@ -3,7 +3,7 @@ import { Accessibility, Users, CheckCircle, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './EventModal.css';
 
-const EventModal = ({ event, onClose, onReserve, onUnregister, onManageEvent }) => {
+const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [optimisticRegistered, setOptimisticRegistered] = useState(null);
@@ -214,7 +214,7 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onManageEvent }) 
           )}
 
           {/* Disabled Friendly Badge */}
-          {event.disabled_friendly === 1 && (
+          {event.disabled_friendly && (
             <div className="section">
               <div className="badge" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32' }}>
                 <Accessibility size={16} />
@@ -236,7 +236,15 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onManageEvent }) 
           {user?.role === 'staff' ? (
             <>
               <button className="btn btn-cancel" onClick={onClose}>Close</button>
-              <button className="btn btn-start" onClick={() => onManageEvent?.(event.id)}>Manage Event</button>
+              <button 
+                className="btn btn-start"
+                onClick={() => {
+                  onEdit?.(event);
+                  onClose();
+                }}
+              >
+                Edit Event
+              </button>
             </>
           ) : (user?.role === 'participant' || user?.role === 'volunteer') ? (
             <>

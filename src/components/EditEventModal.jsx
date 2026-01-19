@@ -17,25 +17,28 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
   });
   const [error, setError] = useState(null);
 
-  // Initialize form with event data
+  // Initialize form data with event details
   useEffect(() => {
     if (event) {
-      const eventDate = new Date(event.fullDate);
-      const year = eventDate.getFullYear();
-      const month = String(eventDate.getMonth() + 1).padStart(2, '0');
-      const date = String(eventDate.getDate()).padStart(2, '0');
-      const hours = String(eventDate.getHours()).padStart(2, '0');
-      const minutes = String(eventDate.getMinutes()).padStart(2, '0');
-      
+      // Format datetime for input
+      let formattedDatetime = '';
+      if (event.fullDate) {
+        const dt = new Date(event.fullDate);
+        formattedDatetime = dt.toISOString().slice(0, 16);
+      } else if (event.eventData?.datetime) {
+        const dt = new Date(event.eventData.datetime);
+        formattedDatetime = dt.toISOString().slice(0, 16);
+      }
+
       setFormData({
-        eventName: event.title || '',
-        eventDescription: event.description || '',
-        disabled_friendly: event.disabled_friendly || false,
-        datetime: `${year}-${month}-${date}T${hours}:${minutes}`,
-        location: event.location || '',
-        additional_information: event.notes || '',
-        max_participants: event.max_participants || '',
-        max_volunteers: event.max_volunteers || ''
+        eventName: event.title || event.eventData?.eventName || '',
+        eventDescription: event.description || event.eventData?.eventDescription || '',
+        disabled_friendly: event.disabled_friendly || event.eventData?.disabled_friendly || false,
+        datetime: formattedDatetime,
+        location: event.location || event.eventData?.location || '',
+        additional_information: event.notes || event.eventData?.additional_information || '',
+        max_participants: event.max_participants || event.eventData?.max_participants || '',
+        max_volunteers: event.max_volunteers || event.eventData?.max_volunteers || ''
       });
     }
   }, [event]);
@@ -78,7 +81,8 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/events/${event.id}`, {
+      const eventId = event.id || event.eventID || event.eventData?.eventID;
+      const response = await fetch(`http://localhost:3001/api/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -112,16 +116,47 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const eventId = event.id || event.eventID || event.eventData?.eventID;
+      const response = await fetch(`http://localhost:3001/api/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        onSuccess?.();
+        onClose();
+      } else {
+        setError(data.error || 'Failed to delete event');
+      }
+    } catch (err) {
+      setError('Failed to delete event. Please try again.');
+      console.error('Error deleting event:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content edit-event-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content create-event-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Edit Event</h3>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
         <div className="modal-body">
-          <form onSubmit={handleSubmit} className="edit-event-form">
+          <form onSubmit={handleSubmit} className="create-event-form">
             {error && (
               <div className="error-message">
                 <p>{error}</p>
@@ -231,20 +266,39 @@ const EditEventModal = ({ event, onClose, onSuccess }) => {
               </label>
             </div>
 
-            <div className="modal-footer">
-              <button type="button" className="btn btn-cancel" onClick={onClose}>
-                Cancel
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button 
+                type="button" 
+                className="btn btn-delete" 
+                onClick={handleDelete}
+                disabled={loading}
+                style={{ 
+                  backgroundColor: '#dc3545', 
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1
+                }}
+              >
+                Delete Event
               </button>
-              <button type="submit" className="btn btn-update" disabled={loading}>
-                {loading ? (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                    <span className="spinner"></span>
-                    Updating...
-                  </span>
-                ) : (
-                  'Update Event'
-                )}
-              </button>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="button" className="btn btn-cancel" onClick={onClose}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-create" disabled={loading}>
+                  {loading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                      <span className="spinner"></span>
+                      Saving...
+                    </span>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         </div>

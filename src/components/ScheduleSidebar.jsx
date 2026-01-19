@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, User, LogOut, UserPlus, LayoutDashboard } from 'lucide-react';
+import { Calendar, User, LogOut, UserPlus, LayoutDashboard, Activity } from 'lucide-react';
 import logo from '../logo.svg';
 import './ScheduleSidebar.css';
 
@@ -11,6 +11,7 @@ const ScheduleSidebar = () => {
 
   const menuItems = [
     { icon: Calendar, label: 'Schedule', path: '/schedule' },
+    { icon: Activity, label: 'Activity', path: '/activity' },
     { icon: User, label: 'Profile', path: '/profile' },
     ...(user?.role === 'staff' ? [
       { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
