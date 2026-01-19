@@ -5,6 +5,7 @@ import ScheduleCalendar from './ScheduleCalendar';
 import EventModal from './EventModal';
 import DatePickerModal from './DatePickerModal';
 import CreateEventModal from './CreateEventModal';
+import EditEventModal from './EditEventModal';
 import Toast from './Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,6 +20,7 @@ const Schedule = () => {
   const [userRegisteredEvents, setUserRegisteredEvents] = useState([]);
   const [toast, setToast] = useState(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [showEditEvent, setShowEditEvent] = useState(false);
 
   const getWeekRange = (date) => {
     const day = date.getDay();
@@ -307,6 +309,10 @@ const Schedule = () => {
     }
   };
 
+  const handleManageEvent = (eventId) => {
+    setShowEditEvent(true);
+  };
+
   return (
     <div className="schedule-container">
       <ScheduleSidebar />
@@ -373,6 +379,7 @@ const Schedule = () => {
           onClose={() => setSelectedEvent(null)}
           onReserve={handleReserve}
           onUnregister={handleUnregister}
+          onManageEvent={handleManageEvent}
         />
       )}
       {showDatePicker && (
@@ -383,6 +390,18 @@ const Schedule = () => {
             setShowDatePicker(false);
           }}
           onClose={() => setShowDatePicker(false)}
+        />
+      )}
+      {showEditEvent && selectedEvent && (
+        <EditEventModal 
+          event={selectedEvent} 
+          onClose={() => setShowEditEvent(false)}
+          onSuccess={() => {
+            setToast({ message: 'Event updated successfully!', type: 'success' });
+            setShowEditEvent(false);
+            setSelectedEvent(null);
+            fetchEvents();
+          }}
         />
       )}
       {showCreateEvent && (

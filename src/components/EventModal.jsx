@@ -3,7 +3,7 @@ import { Accessibility, Users, CheckCircle, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './EventModal.css';
 
-const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
+const EventModal = ({ event, onClose, onReserve, onUnregister, onManageEvent }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [optimisticRegistered, setOptimisticRegistered] = useState(null);
@@ -236,7 +236,7 @@ const EventModal = ({ event, onClose, onReserve, onUnregister }) => {
           {user?.role === 'staff' ? (
             <>
               <button className="btn btn-cancel" onClick={onClose}>Close</button>
-              <button className="btn btn-start">Manage Event</button>
+              <button className="btn btn-start" onClick={() => onManageEvent?.(event.id)}>Manage Event</button>
             </>
           ) : (user?.role === 'participant' || user?.role === 'volunteer') ? (
             <>
