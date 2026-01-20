@@ -3,6 +3,8 @@
   overflow-y: auto;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   padding: 20px;
+  position: relative;
+  isolation: isolate;
 }
 
 .calendar-header {
@@ -15,7 +17,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 2;
 }
 
 .day-header {

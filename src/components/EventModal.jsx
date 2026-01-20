@@ -183,14 +183,24 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
             <>
               {event.participants && event.participants.length > 0 && (
                 <div className="section">
-                  <h4>Registered Participants</h4>
+                  <h4>Registered Participants ({event.participants.length})</h4>
                   <div className="registered-list">
                     {event.participants.map((participant, idx) => (
-                      <div key={idx} className="registered-item">
-                        <span>{participant.fullName}</span>
-                        <span className="registered-date">
-                          {new Date(participant.signed_at).toLocaleDateString()}
-                        </span>
+                      <div key={idx} className="registered-item-card">
+                        <div className="registered-item-avatar">
+                          {participant.fullName?.charAt(0)?.toUpperCase() || 'P'}
+                        </div>
+                        <div className="registered-item-info">
+                          <div className="registered-item-name">{participant.fullName}</div>
+                          {participant.phoneNumber && (
+                            <div className="registered-item-detail">
+                              📞 {participant.phoneNumber}
+                            </div>
+                          )}
+                          <div className="registered-item-date">
+                            Signed up: {new Date(participant.signed_at).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -199,17 +209,34 @@ const EventModal = ({ event, onClose, onReserve, onUnregister, onEdit }) => {
 
               {event.volunteers && event.volunteers.length > 0 && (
                 <div className="section">
-                  <h4>Registered Volunteers</h4>
+                  <h4>Registered Volunteers ({event.volunteers.length})</h4>
                   <div className="registered-list">
                     {event.volunteers.map((volunteer, idx) => (
-                      <div key={idx} className="registered-item">
-                        <span>{volunteer.fullName}</span>
-                        <span className="registered-date">
-                          {new Date(volunteer.signed_at).toLocaleDateString()}
-                        </span>
+                      <div key={idx} className="registered-item-card">
+                        <div className="registered-item-avatar volunteer">
+                          {volunteer.fullName?.charAt(0)?.toUpperCase() || 'V'}
+                        </div>
+                        <div className="registered-item-info">
+                          <div className="registered-item-name">{volunteer.fullName}</div>
+                          {volunteer.email && (
+                            <div className="registered-item-detail">
+                              ✉️ {volunteer.email}
+                            </div>
+                          )}
+                          <div className="registered-item-date">
+                            Signed up: {new Date(volunteer.signed_at).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {(!event.participants || event.participants.length === 0) && 
+               (!event.volunteers || event.volunteers.length === 0) && (
+                <div className="section">
+                  <p style={{ color: '#888', fontStyle: 'italic' }}>No registrations yet</p>
                 </div>
               )}
             </>
